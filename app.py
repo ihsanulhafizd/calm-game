@@ -4,12 +4,10 @@ import pandas as pd
 import os
 
 # ==================================================
-# LANGUAGE FROM QUERY PARAM (INLINE EN | ID)
+# LANGUAGE FROM QUERY PARAM (STABLE API)
 # ==================================================
-params = st.query_params
-if "lang" not in params:
-    params["lang"] = "en"
-LANG = params["lang"]
+params = st.experimental_get_query_params()
+LANG = params.get("lang", ["en"])[0]
 
 # ==================================================
 # CONFIG
@@ -57,11 +55,11 @@ STORY = {
                 "*The morning does not rush the room.*\n\n"
                 "*It arrives the way stories begin — quietly, without demands.*\n\n"
                 "*You don’t need to be ready all at once.*\n\n"
-                "*This page exists only to be read, not to judge you.*"
+                "*This page exists only to stay with you.*"
             ),
             "night": (
-                "*The evening closes around you like a book left open.*\n\n"
-                "*Not finished — only paused.*\n\n"
+                "*The evening closes like a book left open.*\n\n"
+                "*Not finished — just resting between pages.*\n\n"
                 "*You may loosen your grip now.*"
             ),
             "deep_night": (
@@ -106,10 +104,10 @@ STORY = {
     }
 }
 
-T = STORY[LANG]
+T = STORY.get(LANG, STORY["en"])
 
 # ==================================================
-# STYLE (NOVEL OPENING + ICONS)
+# STYLE + ICONS
 # ==================================================
 st.markdown("""
 <style>
@@ -119,24 +117,22 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* Landing page novel feel */
-.novel p {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 18px;
-    line-height: 2.1;
+.block-container {
+    max-width: 640px;
+    padding-top: 2.2rem;
 }
 
-/* Other pages */
 p {
     font-style: italic;
     line-height: 1.9;
     font-size: 16px;
 }
 
-.block-container {
-    max-width: 640px;
-    padding-top: 2.2rem;
+/* Novel opening */
+.novel p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    line-height: 2.1;
 }
 
 /* Language switch */
@@ -156,26 +152,23 @@ p {
     font-weight: 600;
 }
 
-/* ICON LAYERS */
+/* Icons */
 .light, .dust {
     position: fixed;
     border-radius: 50%;
     background: rgba(255,255,255,0.35);
-    animation: float 50s linear infinite;
+    animation: float 55s linear infinite;
 }
-
 .light {
     width: 6px;
     height: 6px;
 }
-
 .dust {
     width: 3px;
     height: 3px;
-    opacity: 0.3;
-    animation-duration: 70s;
+    opacity: 0.25;
+    animation-duration: 80s;
 }
-
 .leaf {
     position: fixed;
     font-size: 14px;
@@ -200,9 +193,9 @@ p {
 </div>
 
 <div class="light" style="left:15%;"></div>
-<div class="light" style="left:55%; animation-duration:60s;"></div>
+<div class="light" style="left:55%; animation-duration:65s;"></div>
 <div class="dust" style="left:35%;"></div>
-<div class="dust" style="left:75%; animation-duration:80s;"></div>
+<div class="dust" style="left:75%; animation-duration:90s;"></div>
 <div class="leaf">🍃</div>
 """.format(
     en="active" if LANG == "en" else "",
@@ -210,10 +203,10 @@ p {
 ), unsafe_allow_html=True)
 
 # ==================================================
-# DATA INIT
+# DATA INIT (SAFE)
 # ==================================================
 if not os.path.exists(DATA_FILE):
-    pd.DataFrame(columns=["date","note"]).to_csv(DATA_FILE, index=False)
+    pd.DataFrame(columns=["date", "note"]).to_csv(DATA_FILE, index=False)
 
 # ==================================================
 # FLOW
@@ -224,3 +217,6 @@ if st.session_state.page == "landing":
     st.markdown(f"<div class='novel'>{T['text'][PHASE]}</div>", unsafe_allow_html=True)
     if st.button(T["start"]):
         go("daily")
+
+elif st.session_state.page == "daily":
+    st.markdown(T["text"][PHASE])

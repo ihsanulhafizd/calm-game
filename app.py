@@ -1,40 +1,28 @@
 import streamlit as st
 from datetime import datetime
-import pandas as pd
-import os
-
-# ==================================================
-# LANGUAGE FROM QUERY PARAM (STABLE API)
-# ==================================================
-params = st.experimental_get_query_params()
-LANG = params.get("lang", ["en"])[0]
 
 # ==================================================
 # CONFIG
 # ==================================================
-APP_TITLE = "For Zara, Always"
-DATA_FILE = "daily_journey.csv"
-
 st.set_page_config(
-    page_title=APP_TITLE,
+    page_title="For Zara, Always",
     page_icon="💗",
     layout="centered"
 )
 
 # ==================================================
-# SESSION
+# LANGUAGE (URL SAFE, NO QUERY API)
 # ==================================================
-if "page" not in st.session_state:
-    st.session_state.page = "landing"
+LANG = st.session_state.get("lang", "en")
 
-def go(p):
-    st.session_state.page = p
+def set_lang(l):
+    st.session_state.lang = l
+    st.rerun()
 
 # ==================================================
 # TIME PHASE
 # ==================================================
 hour = datetime.now().hour
-
 if 1 <= hour <= 3:
     PHASE = "very_late"
 elif hour == 0 or 4 <= hour <= 5:
@@ -45,11 +33,12 @@ else:
     PHASE = "day"
 
 # ==================================================
-# NOVEL STORIES
+# STORY CONTENT (NOVEL STYLE)
 # ==================================================
 STORY = {
     "en": {
         "title": "For Zara, Always",
+        "start": "Enter",
         "text": {
             "day": (
                 "*The morning does not rush the room.*\n\n"
@@ -73,11 +62,11 @@ STORY = {
                 "*Even staying awake counts as courage.*\n\n"
                 "*I am here.*"
             )
-        },
-        "start": "Enter"
+        }
     },
     "id": {
         "title": "Untuk Zara, Selalu",
+        "start": "Masuk",
         "text": {
             "day": (
                 "*Pagi tidak pernah terburu-buru.*\n\n"
@@ -99,15 +88,14 @@ STORY = {
                 "*Bertahan saja sudah cukup.*\n\n"
                 "*Aku di sini.*"
             )
-        },
-        "start": "Masuk"
+        }
     }
 }
 
-T = STORY.get(LANG, STORY["en"])
+T = STORY[LANG]
 
 # ==================================================
-# STYLE + ICONS
+# STYLE + ICONS (SAFE CSS)
 # ==================================================
 st.markdown("""
 <style>
@@ -128,52 +116,43 @@ p {
     font-size: 16px;
 }
 
-/* Novel opening */
 .novel p {
     font-family: 'Cormorant Garamond', serif;
     font-size: 18px;
     line-height: 2.1;
 }
 
-/* Language switch */
+/* Language */
 .lang {
     position: fixed;
     top: 14px;
     right: 18px;
     font-size: 11px;
 }
-.lang a {
-    text-decoration: none;
+.lang span {
+    cursor: pointer;
     margin-left: 6px;
     color: #9ca3af;
 }
-.lang a.active {
+.lang .active {
     color: #111827;
     font-weight: 600;
 }
 
 /* Icons */
-.light, .dust {
-    position: fixed;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.35);
-    animation: float 55s linear infinite;
-}
 .light {
+    position: fixed;
     width: 6px;
     height: 6px;
-}
-.dust {
-    width: 3px;
-    height: 3px;
-    opacity: 0.25;
-    animation-duration: 80s;
+    background: rgba(255,255,255,0.35);
+    border-radius: 50%;
+    animation: float 60s linear infinite;
 }
 .leaf {
     position: fixed;
     font-size: 14px;
     opacity: 0.25;
-    animation: drift 60s linear infinite;
+    animation: drift 70s linear infinite;
 }
 
 @keyframes float {
@@ -187,36 +166,34 @@ p {
 }
 </style>
 
-<div class="lang">
-  <a href="?lang=en" class="{en}">EN</a> |
-  <a href="?lang=id" class="{id}">ID</a>
-</div>
-
-<div class="light" style="left:15%;"></div>
-<div class="light" style="left:55%; animation-duration:65s;"></div>
-<div class="dust" style="left:35%;"></div>
-<div class="dust" style="left:75%; animation-duration:90s;"></div>
+<div class="light" style="left:20%;"></div>
+<div class="light" style="left:60%; animation-duration:80s;"></div>
 <div class="leaf">🍃</div>
-""".format(
-    en="active" if LANG == "en" else "",
-    id="active" if LANG == "id" else ""
-), unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # ==================================================
-# DATA INIT (SAFE)
+# LANGUAGE SWITCH (REAL HORIZONTAL)
 # ==================================================
-if not os.path.exists(DATA_FILE):
-    pd.DataFrame(columns=["date", "note"]).to_csv(DATA_FILE, index=False)
+st.markdown(
+    f"""
+    <div class="lang">
+      <span class="{'active' if LANG=='en' else ''}" onclick="window.location.reload();">EN</span> |
+      <span class="{'active' if LANG=='id' else ''}" onclick="window.location.reload();">ID</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+col1, col2 = st.columns([1,1])
+with col1:
+    st.button("EN", on_click=set_lang, args=("en",))
+with col2:
+    st.button("ID", on_click=set_lang, args=("id",))
 
 # ==================================================
-# FLOW
+# CONTENT
 # ==================================================
 st.markdown(f"## 💗 {T['title']}")
+st.markdown(f"<div class='novel'>{T['text'][PHASE]}</div>", unsafe_allow_html=True)
 
-if st.session_state.page == "landing":
-    st.markdown(f"<div class='novel'>{T['text'][PHASE]}</div>", unsafe_allow_html=True)
-    if st.button(T["start"]):
-        go("daily")
-
-elif st.session_state.page == "daily":
-    st.markdown(T["text"][PHASE])
+st.button(T["start"])

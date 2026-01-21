@@ -1,30 +1,33 @@
 import streamlit as st
-import pandas as pd
 from datetime import datetime
+import pandas as pd
 import os
+
+# ==================================================
+# LANGUAGE FROM QUERY PARAM (INLINE EN | ID)
+# ==================================================
+params = st.query_params
+if "lang" not in params:
+    params["lang"] = "en"
+LANG = params["lang"]
 
 # ==================================================
 # CONFIG
 # ==================================================
-APP_TITLE_EN = "For Zara, Always"
-APP_TITLE_ID = "Untuk Zara, Selalu"
-DAILY_FILE = "daily_journey.csv"
+APP_TITLE = "For Zara, Always"
+DATA_FILE = "daily_journey.csv"
 
 st.set_page_config(
-    page_title=APP_TITLE_EN,
+    page_title=APP_TITLE,
     page_icon="💗",
     layout="centered"
 )
 
 # ==================================================
-# STATE
+# SESSION
 # ==================================================
 if "page" not in st.session_state:
     st.session_state.page = "landing"
-if "lang" not in st.session_state:
-    st.session_state.lang = "en"
-if "last_choice" not in st.session_state:
-    st.session_state.last_choice = None
 
 def go(p):
     st.session_state.page = p
@@ -32,172 +35,108 @@ def go(p):
 # ==================================================
 # TIME PHASE
 # ==================================================
-now = datetime.now()
-hour = now.hour
-today_str = now.strftime("%d %B")
+hour = datetime.now().hour
 
-def time_phase(h):
-    if 1 <= h <= 3:
-        return "very_late_night"
-    if h == 0 or 4 <= h <= 5:
-        return "deep_night"
-    if 18 <= h <= 23:
-        return "night"
-    return "day"
-
-PHASE = time_phase(hour)
+if 1 <= hour <= 3:
+    PHASE = "very_late"
+elif hour == 0 or 4 <= hour <= 5:
+    PHASE = "deep_night"
+elif 18 <= hour <= 23:
+    PHASE = "night"
+else:
+    PHASE = "day"
 
 # ==================================================
-# NOVEL-STYLE STORIES (EN)
+# NOVEL STORIES
 # ==================================================
-STORY_EN = {
-    "day": (
-        "*Morning light does not rush the room.*\n\n"
-        "*It arrives slowly, touching the edges of things before asking anything of them.*\n\n"
-        "*Today can be like that.*\n"
-        "*You don’t need to be ready all at once.*\n\n"
-        "*If your thoughts wander ahead of you, let them.*\n"
-        "*If your body asks for pauses, listen.*\n\n"
-        "*There is no wrong pace here.*\n"
-        "*Only the one that keeps you breathing.*"
-    ),
-    "night": (
-        "*The evening settles the way a book closes halfway.*\n\n"
-        "*Not finished—just resting between chapters.*\n\n"
-        "*Whatever the day asked of you can wait now.*\n"
-        "*The noise softens. The edges blur.*\n\n"
-        "*Tonight is not for fixing.*\n"
-        "*It is for loosening your grip.*\n\n"
-        "*I’m here, sitting quietly beside you.*"
-    ),
-    "deep_night": (
-        "*The room is quiet now.*\n\n"
-        "*Not empty—just still.*\n\n"
-        "*This kind of quiet can make thoughts louder.*\n"
-        "*That doesn’t mean you have to follow them.*\n\n"
-        "*You don’t need clarity at this hour.*\n"
-        "*Only rest.*\n\n"
-        "*You are allowed to simply exist.*"
-    ),
-    "very_late_night": (
-        "*It’s very late, the hour most stories never describe.*\n\n"
-        "*The world is asleep, but you are still here.*\n"
-        "*That alone is enough.*\n\n"
-        "*Nothing needs to be decided tonight.*\n"
-        "*Nothing needs to be solved.*\n\n"
-        "*Wrap yourself in the smallest comforts.*\n"
-        "*Even breathing counts as progress now.*\n\n"
-        "*I won’t leave you alone in this chapter.*"
-    )
-}
-
-# ==================================================
-# NOVEL-STYLE STORIES (ID)
-# ==================================================
-STORY_ID = {
-    "day": (
-        "*Cahaya pagi tidak pernah terburu-buru.*\n\n"
-        "*Ia datang perlahan, menyentuh sudut-sudut sebelum meminta apa pun.*\n\n"
-        "*Hari ini bisa seperti itu.*\n"
-        "*Kamu tidak harus siap sekaligus.*\n\n"
-        "*Jika pikiranmu melayang jauh, biarkan.*\n"
-        "*Jika tubuhmu meminta jeda, dengarkan.*\n\n"
-        "*Tidak ada ritme yang salah di sini.*\n"
-        "*Hanya ritme yang membuatmu tetap bernapas.*"
-    ),
-    "night": (
-        "*Malam turun seperti buku yang ditutup setengah.*\n\n"
-        "*Belum selesai—hanya beristirahat di antara bab.*\n\n"
-        "*Apa pun yang diminta hari ini bisa menunggu.*\n"
-        "*Suara melembut. Garis-garis mengabur.*\n\n"
-        "*Malam ini bukan untuk memperbaiki.*\n"
-        "*Malam ini untuk melepaskan.*\n\n"
-        "*Aku duduk diam di sampingmu.*"
-    ),
-    "deep_night": (
-        "*Ruangan kini sunyi.*\n\n"
-        "*Bukan kosong—hanya tenang.*\n\n"
-        "*Sunyi seperti ini kadang membuat pikiran lebih keras.*\n"
-        "*Itu tidak berarti kamu harus mengikutinya.*\n\n"
-        "*Kamu tidak perlu kejelasan di jam ini.*\n"
-        "*Cukup istirahat.*"
-    ),
-    "very_late_night": (
-        "*Ini sudah sangat larut, jam yang jarang ditulis dalam cerita.*\n\n"
-        "*Dunia tertidur, tapi kamu masih ada di sini.*\n"
-        "*Itu sudah cukup.*\n\n"
-        "*Tidak ada keputusan malam ini.*\n"
-        "*Tidak ada jawaban yang harus ditemukan.*\n\n"
-        "*Selimuti dirimu dengan hal-hal kecil yang menenangkan.*\n"
-        "*Bernapas saja sudah berarti.*\n\n"
-        "*Aku tidak akan meninggalkanmu di bab ini.*"
-    )
-}
-
-# ==================================================
-# TEXT MAP
-# ==================================================
-TEXT = {
+STORY = {
     "en": {
-        "title": APP_TITLE_EN,
-        "landing": STORY_EN["day"],
-        "start": "Enter",
-        "daily": "How does today feel?",
-        "story": STORY_EN[PHASE],
-        "choices": [
-            ("med", "I took my sleep medication"),
-            ("delay", "I delayed or reduced it"),
-            ("none", "I didn’t need it"),
-            ("rest", "Today felt heavy, I rested")
-        ],
-        "note": "You can write anything here:",
-        "save": "Save",
-        "thanks": "*Thank you for turning this page today.*"
+        "title": "For Zara, Always",
+        "text": {
+            "day": (
+                "*The morning does not rush the room.*\n\n"
+                "*It arrives the way stories begin — quietly, without demands.*\n\n"
+                "*You don’t need to be ready all at once.*\n\n"
+                "*This page exists only to be read, not to judge you.*"
+            ),
+            "night": (
+                "*The evening closes around you like a book left open.*\n\n"
+                "*Not finished — only paused.*\n\n"
+                "*You may loosen your grip now.*"
+            ),
+            "deep_night": (
+                "*The world is still in a way that makes every breath noticeable.*\n\n"
+                "*You don’t need clarity in this chapter.*\n\n"
+                "*Just stay.*"
+            ),
+            "very_late": (
+                "*It is very late — the hour most novels never describe.*\n\n"
+                "*Nothing is expected of you now.*\n\n"
+                "*Even staying awake counts as courage.*\n\n"
+                "*I am here.*"
+            )
+        },
+        "start": "Enter"
     },
     "id": {
-        "title": APP_TITLE_ID,
-        "landing": STORY_ID["day"],
-        "start": "Masuk",
-        "daily": "Bagaimana hari ini terasa?",
-        "story": STORY_ID[PHASE],
-        "choices": [
-            ("med", "Aku minum obat tidur"),
-            ("delay", "Aku menunda atau mengurangi"),
-            ("none", "Aku tidak membutuhkannya"),
-            ("rest", "Hari ini terasa berat, aku beristirahat")
-        ],
-        "note": "Kamu bisa menulis apa pun di sini:",
-        "save": "Simpan",
-        "thanks": "*Terima kasih sudah membuka halaman ini hari ini.*"
+        "title": "Untuk Zara, Selalu",
+        "text": {
+            "day": (
+                "*Pagi tidak pernah terburu-buru.*\n\n"
+                "*Ia datang seperti awal cerita — pelan dan tanpa tuntutan.*\n\n"
+                "*Kamu tidak perlu siap sekaligus.*\n\n"
+                "*Halaman ini hanya ingin menemanimu.*"
+            ),
+            "night": (
+                "*Malam menutupmu seperti buku yang dibiarkan terbuka.*\n\n"
+                "*Belum selesai — hanya berhenti sejenak.*"
+            ),
+            "deep_night": (
+                "*Dunia sunyi dengan cara yang membuat napas terasa nyata.*\n\n"
+                "*Kamu tidak perlu kejelasan di bab ini.*"
+            ),
+            "very_late": (
+                "*Ini sangat larut — jam yang jarang ditulis dalam cerita.*\n\n"
+                "*Tidak ada harapan apa pun darimu sekarang.*\n\n"
+                "*Bertahan saja sudah cukup.*\n\n"
+                "*Aku di sini.*"
+            )
+        },
+        "start": "Masuk"
     }
 }
 
-T = TEXT[st.session_state.lang]
+T = STORY[LANG]
 
 # ==================================================
-# STYLE + ICONS
+# STYLE (NOVEL OPENING + ICONS)
 # ==================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500&family=Inter:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Inter:wght@300;400&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-h1, h2, h3 {
-    font-family: 'Playfair Display', serif;
+/* Landing page novel feel */
+.novel p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 2.1;
 }
 
-.block-container {
-    max-width: 640px;
-    padding-top: 2rem;
-}
-
+/* Other pages */
 p {
     font-style: italic;
     line-height: 1.9;
     font-size: 16px;
+}
+
+.block-container {
+    max-width: 640px;
+    padding-top: 2.2rem;
 }
 
 /* Language switch */
@@ -206,98 +145,82 @@ p {
     top: 14px;
     right: 18px;
     font-size: 11px;
-    opacity: .85;
 }
-.lang span {
-    cursor: pointer;
+.lang a {
+    text-decoration: none;
     margin-left: 6px;
+    color: #9ca3af;
 }
-.active { font-weight: 600; }
-.inactive { opacity: .5; }
+.lang a.active {
+    color: #111827;
+    font-weight: 600;
+}
 
-/* Particles */
-.light {
+/* ICON LAYERS */
+.light, .dust {
     position: fixed;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    animation: float 50s linear infinite;
+}
+
+.light {
     width: 6px;
     height: 6px;
-    background: rgba(255,255,255,0.4);
-    border-radius: 50%;
-    animation: float 40s linear infinite;
 }
+
+.dust {
+    width: 3px;
+    height: 3px;
+    opacity: 0.3;
+    animation-duration: 70s;
+}
+
 .leaf {
     position: fixed;
     font-size: 14px;
     opacity: 0.25;
-    animation: drift 55s linear infinite;
+    animation: drift 60s linear infinite;
 }
 
 @keyframes float {
     from { transform: translate(-10vw,110vh); }
     to { transform: translate(110vw,-10vh); }
 }
+
 @keyframes drift {
-    from { transform: translate(110vw,20vh) rotate(0deg); }
-    to { transform: translate(-10vw,80vh) rotate(360deg); }
+    from { transform: translate(110vw,30vh) rotate(0deg); }
+    to { transform: translate(-10vw,70vh) rotate(360deg); }
 }
 </style>
 
-<div class="light" style="left:20%;"></div>
-<div class="light" style="left:60%; animation-duration:45s;"></div>
+<div class="lang">
+  <a href="?lang=en" class="{en}">EN</a> |
+  <a href="?lang=id" class="{id}">ID</a>
+</div>
+
+<div class="light" style="left:15%;"></div>
+<div class="light" style="left:55%; animation-duration:60s;"></div>
+<div class="dust" style="left:35%;"></div>
+<div class="dust" style="left:75%; animation-duration:80s;"></div>
 <div class="leaf">🍃</div>
-""", unsafe_allow_html=True)
+""".format(
+    en="active" if LANG == "en" else "",
+    id="active" if LANG == "id" else ""
+), unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH (INLINE ONLY)
+# DATA INIT
 # ==================================================
-st.markdown(
-    f"""
-    <div class="lang">
-      <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
-            onclick="document.getElementById('lang_en').click()">EN</span> |
-      <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
-            onclick="document.getElementById('lang_id').click()">ID</span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-st.button("EN", key="lang_en", on_click=lambda: st.session_state.update(lang="en"))
-st.button("ID", key="lang_id", on_click=lambda: st.session_state.update(lang="id"))
-
-# ==================================================
-# DATA
-# ==================================================
-if not os.path.exists(DAILY_FILE):
-    pd.DataFrame(columns=["date","time","choice","note"]).to_csv(DAILY_FILE, index=False)
-
-df = pd.read_csv(DAILY_FILE)
+if not os.path.exists(DATA_FILE):
+    pd.DataFrame(columns=["date","note"]).to_csv(DATA_FILE, index=False)
 
 # ==================================================
 # FLOW
 # ==================================================
+st.markdown(f"## 💗 {T['title']}")
+
 if st.session_state.page == "landing":
-    st.markdown(f"## 💗 {T['title']}")
-    st.markdown(T["landing"])
+    st.markdown(f"<div class='novel'>{T['text'][PHASE]}</div>", unsafe_allow_html=True)
     if st.button(T["start"]):
         go("daily")
-
-elif st.session_state.page == "daily":
-    st.markdown(f"### {T['daily']}")
-    st.markdown(T["story"])
-    labels = [lbl for _, lbl in T["choices"]]
-    keys = [k for k, _ in T["choices"]]
-    idx = st.radio("", range(len(labels)), format_func=lambda i: labels[i])
-    note = st.text_area(T["note"], height=180)
-    if st.button(T["save"]):
-        df.loc[len(df)] = [
-            now.strftime("%Y-%m-%d"),
-            now.strftime("%H:%M:%S"),
-            labels[idx],
-            note
-        ]
-        df.to_csv(DAILY_FILE, index=False)
-        go("thanks")
-
-elif st.session_state.page == "thanks":
-    st.markdown(T["thanks"])
-    if st.button("Close"):
-        go("landing")

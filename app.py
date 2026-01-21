@@ -2,25 +2,41 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+import requests
+from streamlit_lottie import st_lottie
 
 # =========================
 # CONFIG
 # =========================
-PLAYER_NAME = "Zara"     # ganti ke "Sayang" kalau mau
+PLAYER_NAME = "Zara"   # ganti ke "Sayang" jika mau
 VIEWER_PASSWORD = "calm123"
 DATA_FILE = "journey.csv"
 
 st.set_page_config(
-    page_title="🌱 A Gentle Journey",
+    page_title="🌱 Gentle Companion Journey",
     page_icon="🌙",
     layout="centered"
 )
 
 # =========================
+# LOAD LOTTIE
+# =========================
+def load_lottie(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Companion states (non-human creature)
+lottie_idle = load_lottie("https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json")
+lottie_walk = load_lottie("https://assets6.lottiefiles.com/packages/lf20_kkflmtur.json")
+lottie_rest = load_lottie("https://assets8.lottiefiles.com/packages/lf20_0fhlytwe.json")
+
+# =========================
 # INIT DATA
 # =========================
 if not os.path.exists(DATA_FILE):
-    df = pd.DataFrame(columns=["date", "step"])
+    df = pd.DataFrame(columns=["date", "step", "choice"])
     df.to_csv(DATA_FILE, index=False)
 else:
     df = pd.read_csv(DATA_FILE)
@@ -28,7 +44,7 @@ else:
 total_steps = df["step"].sum() if not df.empty else 0
 
 # =========================
-# MODE SELECT
+# MODE
 # =========================
 mode = st.sidebar.radio("Mode", ["🎮 Journey", "👀 Companion View"])
 
@@ -36,43 +52,44 @@ mode = st.sidebar.radio("Mode", ["🎮 Journey", "👀 Companion View"])
 # PLAYER MODE
 # =========================
 if mode == "🎮 Journey":
-    st.title(f"🌱 A Gentle Journey for {PLAYER_NAME}")
-    st.caption("No goals. No pressure. Just moving gently together.")
+    st.title(f"🌱 A Gentle Journey with You, {PLAYER_NAME}")
+    st.caption("No tasks. No scores. Just gentle presence.")
 
-    st.markdown("### 🌿 Where would you like to be today?")
+    st.markdown("### 🤍 Your companion is here")
 
     choice = st.radio(
         "",
         [
-            "🌱 Sit quietly together",
+            "🌱 Sit together quietly",
             "🚶 Walk a little",
-            "🌤️ Look at the sky",
-            "🛌 Rest and stay still"
+            "🌙 Rest and stay still"
         ]
     )
 
+    # Default values
     step = 0
     message = ""
+    animation = lottie_idle
 
-    if choice == "🌱 Sit quietly together":
+    if choice == "🌱 Sit together quietly":
         step = 1
-        message = "Being present is already a step."
+        message = "Being here together already matters."
+        animation = lottie_idle
     elif choice == "🚶 Walk a little":
         step = 2
-        message = "A gentle movement forward."
-    elif choice == "🌤️ Look at the sky":
-        step = 1
-        message = "Sometimes looking up is enough."
-    elif choice == "🛌 Rest and stay still":
+        message = "A small movement forward."
+        animation = lottie_walk
+    elif choice == "🌙 Rest and stay still":
         step = 0
-        message = "Resting is not falling behind."
+        message = "Resting is allowed. Nothing is lost."
+        animation = lottie_rest
 
-    if st.button("✨ Stay here today"):
+    st_lottie(animation, height=260)
+
+    if st.button("✨ Stay in this moment"):
         today = datetime.now().strftime("%Y-%m-%d")
-        df = pd.concat(
-            [df, pd.DataFrame([[today, step]], columns=["date", "step"])],
-            ignore_index=True
-        )
+        new_row = pd.DataFrame([[today, step, choice]], columns=["date", "step", "choice"])
+        df = pd.concat([df, new_row], ignore_index=True)
         df.to_csv(DATA_FILE, index=False)
 
         st.success(f"I'm here with you, {PLAYER_NAME}.")
@@ -80,7 +97,7 @@ if mode == "🎮 Journey":
 
         st.markdown("### 🌍 Journey Progress")
         st.progress(min((total_steps + step) / 100, 1.0))
-        st.caption(f"You have gently moved {total_steps + step} steps.")
+        st.caption(f"The journey has gently moved {total_steps + step} steps.")
 
     st.markdown("---")
     st.info(
@@ -93,7 +110,7 @@ if mode == "🎮 Journey":
 # VIEWER MODE
 # =========================
 if mode == "👀 Companion View":
-    st.title("👀 Journey Overview")
+    st.title("👀 Companion Overview")
 
     password = st.text_input("Viewer Password", type="password")
 
@@ -111,6 +128,6 @@ if mode == "👀 Companion View":
             st.line_chart(df.set_index("date")["step"])
 
         st.caption(
-            "This view is for understanding, not controlling.\n"
+            "This view is for understanding, not control.\n"
             "Presence matters more than speed."
         )

@@ -4,11 +4,10 @@ from datetime import datetime
 import os
 
 # ==================================================
-# BASIC CONFIG
+# CONFIG
 # ==================================================
 APP_TITLE_EN = "For Zara, Always"
 APP_TITLE_ID = "Untuk Zara, Selalu"
-
 DAILY_FILE = "daily_journey.csv"
 
 st.set_page_config(
@@ -23,20 +22,20 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 if "lang" not in st.session_state:
-    st.session_state.lang = "en"  # default English
+    st.session_state.lang = "en"
 
 def go(page):
     st.session_state.page = page
 
 # ==================================================
-# DATE LOGIC
+# DATE
 # ==================================================
 now = datetime.now()
 weekday = now.strftime("%A")
 today_str = now.strftime("%d %B")
 
 # ==================================================
-# DAILY MESSAGES
+# MESSAGES
 # ==================================================
 DAILY_EN = {
     "Monday": "Take today slowly. I’m right here with you.",
@@ -75,7 +74,7 @@ BIRTHDAY_ID = (
 )
 
 # ==================================================
-# TEXT CONTENT
+# TEXT
 # ==================================================
 TEXT = {
     "en": {
@@ -127,37 +126,32 @@ TEXT = {
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE — TYPOGRAPHY & SPACING (FIXED)
+# STYLE — FONT + DECORATION
 # ==================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
 }
 
 .block-container {
     max-width: 620px;
     padding-top: 1.6rem;
-    padding-bottom: 2rem;
 }
 
-h1, h2, h3 {
-    letter-spacing: -0.01em;
-}
-
-p {
-    line-height: 1.65;
-    font-size: 15px;
-    margin-bottom: 1rem;
-}
-
+/* Language */
 .lang {
+    text-align: right;
     font-size: 13px;
     color: #6b7280;
-    text-align: right;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
 }
 
 .lang span {
@@ -165,41 +159,75 @@ p {
     margin-left: 6px;
 }
 
-.lang .active {
+.active {
     font-weight: 600;
     color: #111827;
 }
 
-.lang .inactive {
+.inactive {
     color: #9ca3af;
+}
+
+/* Floating stars */
+.star {
+    position: fixed;
+    top: -10px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    animation: fall 20s linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh);
+    }
+}
+
+/* Butterfly */
+.butterfly {
+    position: fixed;
+    left: -50px;
+    top: 40%;
+    font-size: 18px;
+    opacity: 0.15;
+    animation: fly 25s linear infinite;
+}
+
+@keyframes fly {
+    to {
+        transform: translateX(120vw);
+    }
 }
 
 button {
     border-radius: 14px !important;
 }
 </style>
+
+<div class="star" style="left:10%">✦</div>
+<div class="star" style="left:40%">✧</div>
+<div class="star" style="left:70%">✦</div>
+<div class="butterfly">🦋</div>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH — EXACT TEXT STYLE
+# LANGUAGE SWITCH — EN | ID
 # ==================================================
 _, lang_col = st.columns([4,2])
 with lang_col:
     st.markdown(
         f"""
         <div class="lang">
-            Language:
-            <span class="{'active' if st.session_state.lang=='en' else 'inactive'}">English</span> |
-            <span class="{'active' if st.session_state.lang=='id' else 'inactive'}">Indonesia</span>
+            <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
+                  onclick="document.getElementById('en').click()">EN</span> |
+            <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
+                  onclick="document.getElementById('id').click()">ID</span>
         </div>
         """,
         unsafe_allow_html=True
     )
-    col1, col2 = st.columns(2)
-    with col1:
-        st.button("English", key="lang_en", on_click=lambda: st.session_state.update(lang="en"))
-    with col2:
-        st.button("Indonesia", key="lang_id", on_click=lambda: st.session_state.update(lang="id"))
+    st.button("EN", key="en", on_click=lambda: st.session_state.update(lang="en"))
+    st.button("ID", key="id", on_click=lambda: st.session_state.update(lang="id"))
 
 # ==================================================
 # DATA INIT

@@ -39,7 +39,7 @@ today_str = now.strftime("%d %B")
 def time_phase(h):
     if 1 <= h <= 3:
         return "very_late_night"
-    if 0 <= h <= 0 or 4 <= h <= 5:
+    if h == 0 or 4 <= h <= 5:
         return "deep_night"
     if 18 <= h <= 23:
         return "night"
@@ -48,261 +48,90 @@ def time_phase(h):
 PHASE = time_phase(hour)
 
 # ==================================================
-# BASE BOOK-STYLE MESSAGES
+# NOVEL-STYLE STORIES (EN)
 # ==================================================
-BASE_EN = {
+STORY_EN = {
     "day": (
-        "This day does not ask you to hurry.\n\n"
-        "You are allowed to move gently through these hours, "
-        "carrying only what feels possible.\n\n"
-        "There is no race here.\n"
-        "You are already enough."
+        "*Morning light does not rush the room.*\n\n"
+        "*It arrives slowly, touching the edges of things before asking anything of them.*\n\n"
+        "*Today can be like that.*\n"
+        "*You don’t need to be ready all at once.*\n\n"
+        "*If your thoughts wander ahead of you, let them.*\n"
+        "*If your body asks for pauses, listen.*\n\n"
+        "*There is no wrong pace here.*\n"
+        "*Only the one that keeps you breathing.*"
     ),
     "night": (
-        "The night has settled in.\n\n"
-        "If your thoughts are louder now, you don’t need to quiet them.\n\n"
-        "Let the day loosen its grip.\n"
-        "I’m here with you in this calm."
+        "*The evening settles the way a book closes halfway.*\n\n"
+        "*Not finished—just resting between chapters.*\n\n"
+        "*Whatever the day asked of you can wait now.*\n"
+        "*The noise softens. The edges blur.*\n\n"
+        "*Tonight is not for fixing.*\n"
+        "*It is for loosening your grip.*\n\n"
+        "*I’m here, sitting quietly beside you.*"
     ),
     "deep_night": (
-        "It’s late, and the world is mostly asleep.\n\n"
-        "You don’t need answers in the dark.\n"
-        "You don’t need to solve anything now.\n\n"
-        "Just breathe.\n"
-        "You’re not alone."
+        "*The room is quiet now.*\n\n"
+        "*Not empty—just still.*\n\n"
+        "*This kind of quiet can make thoughts louder.*\n"
+        "*That doesn’t mean you have to follow them.*\n\n"
+        "*You don’t need clarity at this hour.*\n"
+        "*Only rest.*\n\n"
+        "*You are allowed to simply exist.*"
     ),
     "very_late_night": (
-        "It’s very late now.\n\n"
-        "If you’re still awake, that’s okay.\n"
-        "Nothing is wrong with you.\n\n"
-        "Wrap yourself in something soft.\n"
-        "Even this moment is allowed to be gentle.\n\n"
-        "I’m right here, keeping you company."
+        "*It’s very late, the hour most stories never describe.*\n\n"
+        "*The world is asleep, but you are still here.*\n"
+        "*That alone is enough.*\n\n"
+        "*Nothing needs to be decided tonight.*\n"
+        "*Nothing needs to be solved.*\n\n"
+        "*Wrap yourself in the smallest comforts.*\n"
+        "*Even breathing counts as progress now.*\n\n"
+        "*I won’t leave you alone in this chapter.*"
     )
 }
 
-BASE_ID = {
+# ==================================================
+# NOVEL-STYLE STORIES (ID)
+# ==================================================
+STORY_ID = {
     "day": (
-        "Hari ini tidak meminta kamu untuk bergegas.\n\n"
-        "Kamu boleh menjalani jam-jam ini dengan pelan, "
-        "membawa hanya yang sanggup kamu bawa.\n\n"
-        "Tidak ada perlombaan di sini.\n"
-        "Kamu sudah cukup."
+        "*Cahaya pagi tidak pernah terburu-buru.*\n\n"
+        "*Ia datang perlahan, menyentuh sudut-sudut sebelum meminta apa pun.*\n\n"
+        "*Hari ini bisa seperti itu.*\n"
+        "*Kamu tidak harus siap sekaligus.*\n\n"
+        "*Jika pikiranmu melayang jauh, biarkan.*\n"
+        "*Jika tubuhmu meminta jeda, dengarkan.*\n\n"
+        "*Tidak ada ritme yang salah di sini.*\n"
+        "*Hanya ritme yang membuatmu tetap bernapas.*"
     ),
     "night": (
-        "Malam telah datang.\n\n"
-        "Jika pikiranmu lebih ramai sekarang, "
-        "kamu tidak perlu memaksanya diam.\n\n"
-        "Biarkan hari ini melonggar.\n"
-        "Aku di sini bersamamu."
+        "*Malam turun seperti buku yang ditutup setengah.*\n\n"
+        "*Belum selesai—hanya beristirahat di antara bab.*\n\n"
+        "*Apa pun yang diminta hari ini bisa menunggu.*\n"
+        "*Suara melembut. Garis-garis mengabur.*\n\n"
+        "*Malam ini bukan untuk memperbaiki.*\n"
+        "*Malam ini untuk melepaskan.*\n\n"
+        "*Aku duduk diam di sampingmu.*"
     ),
     "deep_night": (
-        "Sudah larut, dan dunia hampir tertidur.\n\n"
-        "Kamu tidak perlu jawaban dalam gelap.\n"
-        "Tidak perlu menyelesaikan apa pun sekarang.\n\n"
-        "Bernapaslah.\n"
-        "Kamu tidak sendirian."
+        "*Ruangan kini sunyi.*\n\n"
+        "*Bukan kosong—hanya tenang.*\n\n"
+        "*Sunyi seperti ini kadang membuat pikiran lebih keras.*\n"
+        "*Itu tidak berarti kamu harus mengikutinya.*\n\n"
+        "*Kamu tidak perlu kejelasan di jam ini.*\n"
+        "*Cukup istirahat.*"
     ),
     "very_late_night": (
-        "Sekarang sudah sangat larut.\n\n"
-        "Jika kamu masih terjaga, itu tidak apa-apa.\n"
-        "Tidak ada yang salah denganmu.\n\n"
-        "Selimuti dirimu dengan sesuatu yang hangat.\n"
-        "Bahkan momen ini boleh lembut.\n\n"
-        "Aku di sini menemanimu."
+        "*Ini sudah sangat larut, jam yang jarang ditulis dalam cerita.*\n\n"
+        "*Dunia tertidur, tapi kamu masih ada di sini.*\n"
+        "*Itu sudah cukup.*\n\n"
+        "*Tidak ada keputusan malam ini.*\n"
+        "*Tidak ada jawaban yang harus ditemukan.*\n\n"
+        "*Selimuti dirimu dengan hal-hal kecil yang menenangkan.*\n"
+        "*Bernapas saja sudah berarti.*\n\n"
+        "*Aku tidak akan meninggalkanmu di bab ini.*"
     )
-}
-
-# 🎉 Birthday override
-BIRTHDAY_EN = (
-    "🎉 *Happy Birthday, my love.*\n\n"
-    "*Today is not for carrying weight.*\n\n"
-    "*Let today hold you instead.*\n\n"
-    "*You are deeply loved — exactly as you are.*"
-)
-BIRTHDAY_ID = (
-    "🎉 *Selamat ulang tahun, sayang.*\n\n"
-    "*Hari ini bukan untuk menanggung beban.*\n\n"
-    "*Biarkan hari ini yang memelukmu.*\n\n"
-    "*Kamu sangat dicintai — apa adanya.*"
-)
-
-# ==================================================
-# CHOICE-AWARE THANK YOU MESSAGES
-# ==================================================
-THANKS_BY_CHOICE_EN = {
-    "med": {
-        "day": (
-            "Thank you for being honest with yourself.\n\n"
-            "Taking medication does not erase your effort.\n"
-            "It means you chose care in the way you could today.\n\n"
-            "Be gentle with yourself."
-        ),
-        "night": (
-            "Tonight, choosing support was an act of care.\n\n"
-            "You did not give up.\n"
-            "You listened to your limits.\n\n"
-            "Rest softly."
-        ),
-        "deep_night": (
-            "At this hour, survival matters more than perfection.\n\n"
-            "You chose what helped you stay afloat.\n"
-            "That is enough for now."
-        ),
-        "very_late_night": (
-            "So late at night, even small choices take courage.\n\n"
-            "You chose care.\n"
-            "Let yourself be held by rest."
-        )
-    },
-    "delay": {
-        "day": (
-            "You tried to pause, even briefly.\n\n"
-            "That space you created matters.\n"
-            "Progress can be quiet."
-        ),
-        "night": (
-            "Tonight, you listened before reacting.\n\n"
-            "That awareness is not small.\n"
-            "I’m proud of you."
-        ),
-        "deep_night": (
-            "Even in the dark, you made room for choice.\n\n"
-            "That counts.\n"
-            "Rest now."
-        ),
-        "very_late_night": (
-            "At this hour, restraint is tiring.\n\n"
-            "You did what you could.\n"
-            "That is enough."
-        )
-    },
-    "none": {
-        "day": (
-            "Today, your body carried you on its own.\n\n"
-            "Notice that strength — quietly.\n"
-            "You earned this gentleness."
-        ),
-        "night": (
-            "Tonight, you didn’t need extra support.\n\n"
-            "That doesn’t mean tomorrow must be the same.\n"
-            "For now, rest."
-        ),
-        "deep_night": (
-            "Being awake without needing medication can feel strange.\n\n"
-            "Let your body find its rhythm.\n"
-            "You’re safe."
-        ),
-        "very_late_night": (
-            "So late, and you’re still here.\n\n"
-            "Nothing to prove.\n"
-            "Just breathe."
-        )
-    },
-    "rest": {
-        "day": (
-            "Choosing rest is not avoidance.\n\n"
-            "It is wisdom.\n"
-            "Your body asked, and you listened."
-        ),
-        "night": (
-            "Tonight felt heavy, and you honored that.\n\n"
-            "Rest is a response, not a failure."
-        ),
-        "deep_night": (
-            "At this hour, resting is an act of kindness.\n\n"
-            "Let yourself sink into it."
-        ),
-        "very_late_night": (
-            "So late, heaviness can feel louder.\n\n"
-            "You chose to rest.\n"
-            "That was the right thing."
-        )
-    }
-}
-
-THANKS_BY_CHOICE_ID = {
-    "med": {
-        "day": (
-            "Terima kasih sudah jujur pada dirimu.\n\n"
-            "Minum obat tidak menghapus usahamu.\n"
-            "Itu berarti kamu memilih merawat diri hari ini."
-        ),
-        "night": (
-            "Malam ini, memilih bantuan adalah bentuk peduli.\n\n"
-            "Kamu tidak menyerah.\n"
-            "Istirahatlah dengan lembut."
-        ),
-        "deep_night": (
-            "Di jam ini, bertahan lebih penting dari sempurna.\n\n"
-            "Pilihanmu sudah cukup."
-        ),
-        "very_late_night": (
-            "Di jam yang sangat larut, pilihan kecil pun butuh tenaga.\n\n"
-            "Kamu memilih merawat diri.\n"
-            "Biarkan dirimu beristirahat."
-        )
-    },
-    "delay": {
-        "day": (
-            "Kamu mencoba memberi jeda.\n\n"
-            "Ruang kecil itu berarti.\n"
-            "Perubahan bisa sunyi."
-        ),
-        "night": (
-            "Malam ini, kamu mendengarkan dirimu dulu.\n\n"
-            "Aku bangga padamu."
-        ),
-        "deep_night": (
-            "Bahkan dalam gelap, kamu memberi ruang untuk memilih.\n\n"
-            "Istirahatlah."
-        ),
-        "very_late_night": (
-            "Menahan diri di jam ini melelahkan.\n\n"
-            "Apa yang kamu lakukan sudah cukup."
-        )
-    },
-    "none": {
-        "day": (
-            "Hari ini tubuhmu menopangmu sendiri.\n\n"
-            "Sadari kekuatan itu — dengan lembut."
-        ),
-        "night": (
-            "Malam ini kamu tidak membutuhkan tambahan.\n\n"
-            "Besok tidak harus sama.\n"
-            "Untuk sekarang, beristirahatlah."
-        ),
-        "deep_night": (
-            "Terjaga tanpa obat bisa terasa aneh.\n\n"
-            "Biarkan tubuh menemukan ritmenya.\n"
-            "Kamu aman."
-        ),
-        "very_late_night": (
-            "Sudah sangat larut, dan kamu masih di sini.\n\n"
-            "Tidak perlu membuktikan apa pun.\n"
-            "Bernapaslah."
-        )
-    },
-    "rest": {
-        "day": (
-            "Memilih istirahat bukan menghindar.\n\n"
-            "Itu kebijaksanaan.\n"
-            "Tubuhmu meminta, dan kamu mendengar."
-        ),
-        "night": (
-            "Malam ini terasa berat, dan kamu menghormatinya.\n\n"
-            "Istirahat bukan kegagalan."
-        ),
-        "deep_night": (
-            "Di jam ini, istirahat adalah kebaikan.\n\n"
-            "Biarkan dirimu tenggelam di dalamnya."
-        ),
-        "very_late_night": (
-            "Di jam yang sangat larut, berat terasa lebih keras.\n\n"
-            "Kamu memilih istirahat.\n"
-            "Itu tepat."
-        )
-    }
 }
 
 # ==================================================
@@ -311,70 +140,114 @@ THANKS_BY_CHOICE_ID = {
 TEXT = {
     "en": {
         "title": APP_TITLE_EN,
-        "landing": (
-            "*This space is not asking you to change.*\n\n"
-            "*It is here to walk with you, page by page.*\n\n"
-            "*Take your time.*"
-        ),
+        "landing": STORY_EN["day"],
         "start": "Enter",
         "daily": "How does today feel?",
-        "base": BIRTHDAY_EN if today_str == "27 February" else BASE_EN[PHASE],
+        "story": STORY_EN[PHASE],
         "choices": [
             ("med", "I took my sleep medication"),
             ("delay", "I delayed or reduced it"),
             ("none", "I didn’t need it"),
             ("rest", "Today felt heavy, I rested")
         ],
-        "note": "You can write anything you want here:",
+        "note": "You can write anything here:",
         "save": "Save",
-        "thanks": lambda key: (
-            BIRTHDAY_EN if today_str == "27 February"
-            else THANKS_BY_CHOICE_EN[key][PHASE]
-        )
+        "thanks": "*Thank you for turning this page today.*"
     },
     "id": {
         "title": APP_TITLE_ID,
-        "landing": (
-            "*Ruang ini tidak meminta kamu berubah.*\n\n"
-            "*Ia berjalan bersamamu, halaman demi halaman.*\n\n"
-            "*Ambil waktumu.*"
-        ),
+        "landing": STORY_ID["day"],
         "start": "Masuk",
         "daily": "Bagaimana hari ini terasa?",
-        "base": BIRTHDAY_ID if today_str == "27 February" else BASE_ID[PHASE],
+        "story": STORY_ID[PHASE],
         "choices": [
             ("med", "Aku minum obat tidur"),
             ("delay", "Aku menunda atau mengurangi"),
             ("none", "Aku tidak membutuhkannya"),
             ("rest", "Hari ini terasa berat, aku beristirahat")
         ],
-        "note": "Kamu bisa menuliskan apa pun di sini:",
+        "note": "Kamu bisa menulis apa pun di sini:",
         "save": "Simpan",
-        "thanks": lambda key: (
-            BIRTHDAY_ID if today_str == "27 February"
-            else THANKS_BY_CHOICE_ID[key][PHASE]
-        )
+        "thanks": "*Terima kasih sudah membuka halaman ini hari ini.*"
     }
 }
 
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE (BOOK FEEL)
+# STYLE + ICONS
 # ==================================================
 st.markdown("""
 <style>
-.block-container { max-width: 640px; padding-top: 1.8rem; }
-p { font-style: italic; line-height: 1.9; font-size: 16px; }
-.lang { position: fixed; top: 12px; right: 18px; font-size: 11px; opacity: .8; }
-.lang span { cursor: pointer; margin-left: 6px; }
-.active { font-weight: 600; opacity: 1; }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500&family=Inter:wght@300;400&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+}
+
+.block-container {
+    max-width: 640px;
+    padding-top: 2rem;
+}
+
+p {
+    font-style: italic;
+    line-height: 1.9;
+    font-size: 16px;
+}
+
+/* Language switch */
+.lang {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    font-size: 11px;
+    opacity: .85;
+}
+.lang span {
+    cursor: pointer;
+    margin-left: 6px;
+}
+.active { font-weight: 600; }
 .inactive { opacity: .5; }
+
+/* Particles */
+.light {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    animation: float 40s linear infinite;
+}
+.leaf {
+    position: fixed;
+    font-size: 14px;
+    opacity: 0.25;
+    animation: drift 55s linear infinite;
+}
+
+@keyframes float {
+    from { transform: translate(-10vw,110vh); }
+    to { transform: translate(110vw,-10vh); }
+}
+@keyframes drift {
+    from { transform: translate(110vw,20vh) rotate(0deg); }
+    to { transform: translate(-10vw,80vh) rotate(360deg); }
+}
 </style>
+
+<div class="light" style="left:20%;"></div>
+<div class="light" style="left:60%; animation-duration:45s;"></div>
+<div class="leaf">🍃</div>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH
+# LANGUAGE SWITCH (INLINE ONLY)
 # ==================================================
 st.markdown(
     f"""
@@ -409,14 +282,12 @@ if st.session_state.page == "landing":
 
 elif st.session_state.page == "daily":
     st.markdown(f"### {T['daily']}")
-    st.markdown(T["base"])
+    st.markdown(T["story"])
     labels = [lbl for _, lbl in T["choices"]]
     keys = [k for k, _ in T["choices"]]
     idx = st.radio("", range(len(labels)), format_func=lambda i: labels[i])
-    choice_key = keys[idx]
-    note = st.text_area(T["note"], height=160)
+    note = st.text_area(T["note"], height=180)
     if st.button(T["save"]):
-        st.session_state.last_choice = choice_key
         df.loc[len(df)] = [
             now.strftime("%Y-%m-%d"),
             now.strftime("%H:%M:%S"),
@@ -427,6 +298,6 @@ elif st.session_state.page == "daily":
         go("thanks")
 
 elif st.session_state.page == "thanks":
-    st.markdown(T["thanks"](st.session_state.last_choice))
+    st.markdown(T["thanks"])
     if st.button("Close"):
         go("landing")

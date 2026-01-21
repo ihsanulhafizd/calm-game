@@ -2,10 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-import matplotlib.pyplot as plt
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
 
 # ==================================================
 # IDENTITAS
@@ -13,7 +9,6 @@ from reportlab.lib.pagesizes import A4
 DISPLAY_NAME = "Zara"
 FULL_NAME = "Azzahra Muhabbah Zain"
 VIEWER_PASSWORD = "06september2025"
-VIEWER_NAME = "Owner"
 
 APP_TITLE_EN = "For Zara, Always"
 APP_TITLE_ID = "Untuk Zara, Selalu"
@@ -22,8 +17,6 @@ APP_TITLE_ID = "Untuk Zara, Selalu"
 # FILES
 # ==================================================
 DAILY_FILE = "daily_journey.csv"
-VIEWER_LOG_FILE = "viewer_log.csv"
-PDF_FILE = "zara_progress.pdf"
 
 st.set_page_config(
     page_title=APP_TITLE_EN,
@@ -37,35 +30,61 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 if "lang" not in st.session_state:
-    st.session_state.lang = "en"   # DEFAULT ENGLISH
+    st.session_state.lang = "en"   # default English
 
 def go(page):
     st.session_state.page = page
 
 # ==================================================
-# DAILY MESSAGE BY DAY
+# TANGGAL HARI INI
+# ==================================================
+today = datetime.now()
+weekday = today.strftime("%A")
+today_str = today.strftime("%d %B")
+
+# ==================================================
+# PESAN HARIAN
 # ==================================================
 DAILY_MESSAGES_EN = {
-    "Monday": "Take this day slowly. You don’t have to carry everything at once.",
-    "Tuesday": "You’re doing enough, even on days that feel uncertain.",
-    "Wednesday": "Pause when you need to. I’m still here with you.",
-    "Thursday": "Not every step has to be strong. Gentle steps count too.",
-    "Friday": "You’ve carried a lot this week. Be kind to yourself.",
-    "Saturday": "Today doesn’t need a purpose. Rest is enough.",
-    "Sunday": "Whatever tomorrow brings, you don’t face it alone."
+    "Monday": "Take today slowly. I’m right here with you.",
+    "Tuesday": "You’re doing enough, even if it doesn’t feel like it.",
+    "Wednesday": "Pause when you need to. You’re allowed to.",
+    "Thursday": "Not every step needs strength. Presence is enough.",
+    "Friday": "You’ve carried a lot this week. Be gentle with yourself.",
+    "Saturday": "Rest is not wasted time. It matters.",
+    "Sunday": "Whatever tomorrow brings, you won’t face it alone."
 }
 
 DAILY_MESSAGES_ID = {
-    "Monday": "Jalani hari ini pelan-pelan. Kamu tidak harus menanggung semuanya.",
+    "Monday": "Jalani hari ini pelan-pelan. Aku ada di sini.",
     "Tuesday": "Apa yang kamu lakukan hari ini sudah cukup.",
-    "Wednesday": "Berhentilah sejenak jika perlu. Aku tetap di sini.",
-    "Thursday": "Tidak semua langkah harus kuat. Langkah pelan pun berarti.",
-    "Friday": "Minggu ini berat. Tolong bersikap lembut pada dirimu.",
-    "Saturday": "Hari ini tidak perlu tujuan. Beristirahat sudah cukup.",
-    "Sunday": "Apa pun yang datang besok, kamu tidak sendirian."
+    "Wednesday": "Berhenti sejenak tidak apa-apa.",
+    "Thursday": "Tidak semua langkah harus kuat.",
+    "Friday": "Minggu ini berat. Tolong lembut pada dirimu.",
+    "Saturday": "Beristirahat bukan hal sia-sia.",
+    "Sunday": "Apa pun besok, kamu tidak sendirian."
 }
 
-today_name = datetime.now().strftime("%A")
+# 🎉 BIRTHDAY MESSAGE – 27 FEBRUARY
+BIRTHDAY_EN = (
+    "🎉 Happy Birthday, my love.\n\n"
+    "Today is not just another day.\n"
+    "It’s the day the world became warmer because you arrived.\n\n"
+    "You don’t need to be strong today.\n"
+    "You don’t need to carry anything.\n\n"
+    "Today, you are celebrated.\n"
+    "And I’m endlessly grateful for you."
+)
+
+BIRTHDAY_ID = (
+    "🎉 Selamat ulang tahun, sayang.\n\n"
+    "Hari ini bukan hari biasa.\n"
+    "Ini hari ketika dunia menjadi lebih hangat karena kamu ada.\n\n"
+    "Hari ini kamu tidak perlu kuat.\n"
+    "Tidak perlu menanggung apa pun.\n\n"
+    "Hari ini tentang kamu.\n"
+    "Dan aku bersyukur kamu ada."
+)
 
 # ==================================================
 # TEXT
@@ -75,185 +94,118 @@ TEXT = {
         "title": APP_TITLE_EN,
         "landing": (
             "My love,\n\n"
-            "This space exists for one reason only:\n"
-            "to stay with you.\n\n"
-            "There is nothing you need to fix today.\n"
-            "Nothing you need to prove.\n\n"
-            "I’m here. Always."
+            "This space exists only to stay with you.\n"
+            "No fixing. No proving.\n\n"
+            "Just presence.\n\n"
+            "I’m here."
         ),
-        "start": "Come in slowly",
-        "daily": "How does today feel, my love?",
-        "daily_message": DAILY_MESSAGES_EN.get(today_name, ""),
+        "start": "Come in",
+        "daily": "How does today feel?",
+        "message": BIRTHDAY_EN if today_str == "27 February" else DAILY_MESSAGES_EN.get(weekday, ""),
         "choices": [
             "I took my sleep medication",
             "I delayed or reduced it",
             "I didn’t need it",
             "Today felt heavy, I rested"
         ],
-        "note": "If you want, you can share a little why:",
-        "save": "Save today",
-        "thanks_title": "Thank you, my love",
-        "thanks_text": (
-            "Thank you for showing up today.\n\n"
-            "Whatever you chose,\n"
-            "it is not a failure.\n\n"
-            "It’s honesty.\n"
-            "And that matters.\n\n"
-            "Rest now.\n"
-            "I’m still here."
-        ),
-        "next_title": "What Comes Next",
-        "next_text": (
-            "You don’t need to do anything right now.\n\n"
-            "If you want, you can:\n"
-            "• rest for a moment\n"
-            "• drink some water\n"
-            "• take a slow breath\n\n"
-            "This space will wait for you."
-        ),
-        "back": "Back",
-        "viewer_title": "Private Observer Mode",
-        "password": "Password"
+        "note": "If you want, you can write a few words:",
+        "save": "Save",
+        "thanks": (
+            "Thank you for being here today.\n\n"
+            "Whatever you shared is enough.\n"
+            "I’m proud of you."
+        )
     },
     "id": {
         "title": APP_TITLE_ID,
         "landing": (
             "Sayang,\n\n"
-            "Ruang ini ada hanya untuk satu hal:\n"
-            "menemanimu.\n\n"
-            "Tidak ada yang perlu kamu perbaiki hari ini.\n"
-            "Tidak ada yang perlu kamu buktikan.\n\n"
-            "Aku di sini. Selalu."
+            "Ruang ini ada untuk menemanimu.\n"
+            "Tanpa tuntutan. Tanpa penilaian.\n\n"
+            "Hanya kehadiran.\n\n"
+            "Aku di sini."
         ),
-        "start": "Masuk pelan-pelan",
-        "daily": "Bagaimana hari ini terasa, sayang?",
-        "daily_message": DAILY_MESSAGES_ID.get(today_name, ""),
+        "start": "Masuk",
+        "daily": "Bagaimana hari ini terasa?",
+        "message": BIRTHDAY_ID if today_str == "27 February" else DAILY_MESSAGES_ID.get(weekday, ""),
         "choices": [
             "Aku minum obat tidur",
             "Aku menunda atau mengurangi",
             "Aku tidak membutuhkannya",
             "Hari ini terasa berat, aku beristirahat"
         ],
-        "note": "Kalau kamu ingin, ceritakan sedikit alasannya:",
-        "save": "Simpan hari ini",
-        "thanks_title": "Terima kasih, sayang",
-        "thanks_text": (
+        "note": "Kalau mau, tuliskan sedikit:",
+        "save": "Simpan",
+        "thanks": (
             "Terima kasih sudah hadir hari ini.\n\n"
-            "Apa pun pilihanmu,\n"
-            "itu bukan kegagalan.\n\n"
-            "Itu kejujuran.\n"
-            "Dan itu berarti.\n\n"
-            "Istirahatlah.\n"
-            "Aku tetap di sini."
-        ),
-        "next_title": "Langkah Selanjutnya",
-        "next_text": (
-            "Sekarang kamu tidak perlu melakukan apa pun.\n\n"
-            "Kalau mau, kamu bisa:\n"
-            "• beristirahat sebentar\n"
-            "• minum air putih\n"
-            "• menarik napas pelan\n\n"
-            "Ruang ini akan menunggumu."
-        ),
-        "back": "Kembali",
-        "viewer_title": "Mode Pemantau (Pribadi)",
-        "password": "Password"
+            "Apa pun yang kamu tulis sudah cukup.\n"
+            "Aku bangga padamu."
+        )
     }
 }
 
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE
+# STYLE (MINIMAL)
 # ==================================================
 st.markdown("""
 <style>
-.block-container { max-width: 680px; padding-top: 1.5rem; }
-.caption { color:#6b7280; font-size:14.5px; line-height:1.6; }
-.lang { text-align:right; font-size:13px; color:#6b7280; }
-button { border-radius:18px !important; }
+.block-container { max-width: 640px; padding-top: 1.2rem; }
+p { line-height: 1.6; }
+.lang { font-size: 13px; color: #6b7280; text-align: right; }
+button { border-radius: 16px !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH (IN PLACE)
+# LANGUAGE SWITCH (INLINE)
 # ==================================================
-_, right = st.columns([5,1])
+left, right = st.columns([4,2])
 with right:
-    st.markdown("<div class='lang'>Language</div>", unsafe_allow_html=True)
-    if st.button("English"):
-        st.session_state.lang = "en"
-    if st.button("Indonesia"):
-        st.session_state.lang = "id"
+    st.markdown("Language:", unsafe_allow_html=True)
+    l1, l2 = st.columns(2)
+    with l1:
+        if st.button("English"):
+            st.session_state.lang = "en"
+    with l2:
+        if st.button("Indonesia"):
+            st.session_state.lang = "id"
 
 # ==================================================
 # DATA INIT
 # ==================================================
 if not os.path.exists(DAILY_FILE):
     pd.DataFrame(columns=["date","time","choice","note"]).to_csv(DAILY_FILE, index=False)
-if not os.path.exists(VIEWER_LOG_FILE):
-    pd.DataFrame(columns=["date","time","viewer"]).to_csv(VIEWER_LOG_FILE, index=False)
 
 daily_df = pd.read_csv(DAILY_FILE)
-viewer_log_df = pd.read_csv(VIEWER_LOG_FILE)
 
 # ==================================================
-# VIEWER MODE
+# FLOW
 # ==================================================
-if st.query_params.get("viewer") == "true":
-    st.markdown(f"## {T['viewer_title']}")
-    st.markdown(f"**Name:** {FULL_NAME}")
-    pw = st.text_input(T["password"], type="password")
+if st.session_state.page == "landing":
+    st.markdown(f"## 💗 {T['title']}")
+    st.markdown(T["landing"])
+    if st.button(T["start"]):
+        go("daily")
 
-    if pw == VIEWER_PASSWORD:
+elif st.session_state.page == "daily":
+    st.markdown(f"### {T['daily']}")
+    st.markdown(T["message"])
+    choice = st.radio("", T["choices"])
+    note = st.text_area(T["note"], height=80)
+    if st.button(T["save"]):
         now = datetime.now()
-        viewer_log_df.loc[len(viewer_log_df)] = [
+        daily_df.loc[len(daily_df)] = [
             now.strftime("%Y-%m-%d"),
             now.strftime("%H:%M:%S"),
-            VIEWER_NAME
+            choice,
+            note
         ]
-        viewer_log_df.to_csv(VIEWER_LOG_FILE, index=False)
+        daily_df.to_csv(DAILY_FILE, index=False)
+        go("thanks")
 
-        st.subheader("Viewer Access Log")
-        st.dataframe(viewer_log_df)
-
-        st.subheader("Zara’s Daily Entries")
-        st.dataframe(daily_df)
-
-# ==================================================
-# PLAYER FLOW
-# ==================================================
-else:
-    if st.session_state.page == "landing":
-        st.markdown(f"## 💗 {T['title']}")
-        st.markdown(f"<p class='caption'>{T['landing']}</p>", unsafe_allow_html=True)
-        if st.button(T["start"]):
-            go("daily")
-
-    elif st.session_state.page == "daily":
-        st.markdown(f"## 🤍 {T['daily']}")
-        st.markdown(f"<p class='caption'>{T['daily_message']}</p>", unsafe_allow_html=True)
-        choice = st.radio("", T["choices"])
-        note = st.text_area(T["note"], height=90)
-        if st.button(T["save"]):
-            now = datetime.now()
-            daily_df.loc[len(daily_df)] = [
-                now.strftime("%Y-%m-%d"),
-                now.strftime("%H:%M:%S"),
-                choice,
-                note
-            ]
-            daily_df.to_csv(DAILY_FILE, index=False)
-            go("thanks")
-
-    elif st.session_state.page == "thanks":
-        st.markdown(f"## {T['thanks_title']}")
-        st.markdown(f"<p class='caption'>{T['thanks_text']}</p>", unsafe_allow_html=True)
-        if st.button("Continue"):
-            go("next")
-
-    elif st.session_state.page == "next":
-        st.markdown(f"## {T['next_title']}")
-        st.markdown(f"<p class='caption'>{T['next_text']}</p>", unsafe_allow_html=True)
-        if st.button(T["back"]):
-            go("landing")
+elif st.session_state.page == "thanks":
+    st.markdown(T["thanks"])
+    if st.button("OK"):
+        go("landing")

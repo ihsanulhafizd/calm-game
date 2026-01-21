@@ -2,3 +2,5 @@ streamlit
 pandas
 streamlit-lottie
 requests
+matplotlib
+reportlab

@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-import random
 import requests
 from streamlit_lottie import st_lottie
 import matplotlib.pyplot as plt
@@ -22,7 +21,7 @@ PDF_FILE = "zara_progress.pdf"
 
 st.set_page_config(
     page_title="Zara’s Gentle Space",
-    page_icon="🌙",
+    page_icon="🌤️",
     layout="centered"
 )
 
@@ -31,53 +30,45 @@ st.set_page_config(
 # ==================================================
 if "page" not in st.session_state:
     st.session_state.page = "landing"
-if "theme" not in st.session_state:
-    st.session_state.theme = "light"
 
 def go(page):
     st.session_state.page = page
 
-def toggle_theme():
-    st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
-
 # ==================================================
-# THEME
+# BRIGHT & AIRY STYLE (NO CARDS)
 # ==================================================
-if st.session_state.theme == "light":
-    BG, CARD, TEXT, SUB = "#fafaf9", "#ffffff", "#1f2937", "#6b7280"
-else:
-    BG, CARD, TEXT, SUB = "#0f1115", "#1a1d24", "#e5e7eb", "#9ca3af"
-
-st.markdown(f"""
+st.markdown("""
 <style>
-html, body, [class*="css"] {{
-    background-color: {BG};
-    color: {TEXT};
+html, body, [class*="css"] {
+    background-color: #fbfcfa;
+    color: #1f2937;
     font-family: 'Inter', sans-serif;
-}}
-.block-container {{
+}
+.block-container {
     max-width: 720px;
     padding-top: 2.5rem;
-}}
-.card {{
-    background: {CARD};
-    border-radius: 22px;
-    padding: 26px;
-    margin-bottom: 30px;
-    box-shadow: 0 8px 22px rgba(0,0,0,0.05);
-}}
-.caption {{
-    color: {SUB};
+}
+h1, h2 {
+    font-weight: 600;
+}
+.caption {
+    color: #6b7280;
     font-size: 13px;
     line-height: 1.6;
-    text-align: center;
-}}
-button {{ border-radius: 16px !important; }}
+}
+button {
+    border-radius: 18px !important;
+}
+hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LOAD CUTE ANIMATION
+# LOAD ONE CUTE ANIMATION
 # ==================================================
 def load_lottie(url):
     r = requests.get(url)
@@ -110,40 +101,49 @@ SCORE_MAP = {
 }
 
 # ==================================================
+# WEEKLY AVAILABILITY CHECK
+# ==================================================
+weekly_available = False
+if not daily_df.empty:
+    first_day = pd.to_datetime(daily_df["date"]).min()
+    if (datetime.now() - first_day).days >= 7:
+        weekly_available = True
+
+# ==================================================
 # NAV BAR
 # ==================================================
-n1, n2, n3, n4 = st.columns([2,2,2,1])
-with n1:
+nav1, nav2, nav3 = st.columns([2,2,2])
+with nav1:
     if st.button("🌱 Zara"):
         go("journey")
-with n2:
+with nav2:
     if st.button("📝 Weekly"):
         go("weekly")
-with n3:
+with nav3:
     if st.button("👀 Care View"):
         go("viewer")
-with n4:
-    if st.button("🌓"):
-        toggle_theme()
+
+st.markdown("<hr>", unsafe_allow_html=True)
 
 # ==================================================
 # LANDING
 # ==================================================
 if st.session_state.page == "landing":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h1>🌙 Zara’s Gentle Space</h1>", unsafe_allow_html=True)
+    st.markdown("## 🌤️ Zara’s Gentle Space")
     st_lottie(lottie_companion, height=180)
-    st.markdown("<p class='caption'>This space listens. It never judges.</p>", unsafe_allow_html=True)
+    st.markdown(
+        "<p class='caption'>A light place. Nothing to fix. Nothing to prove.</p>",
+        unsafe_allow_html=True
+    )
     if st.button("Enter"):
         go("journey")
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
 # DAILY JOURNEY
 # ==================================================
 elif st.session_state.page == "journey":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown(f"<h2>🤍 {PLAYER_NAME}, how was today?</h2>", unsafe_allow_html=True)
+    st.markdown(f"## 🤍 Hi Zara")
+    st.markdown("<p class='caption'>How did today feel?</p>", unsafe_allow_html=True)
 
     choice = st.radio(
         "",
@@ -152,12 +152,12 @@ elif st.session_state.page == "journey":
     )
 
     note = st.text_area(
-        "If you want, you can share why:",
+        "If you want, you can share a little why:",
         placeholder="A few words are enough…",
-        height=120
+        height=110
     )
 
-    st_lottie(lottie_companion, height=160)
+    st_lottie(lottie_companion, height=150)
 
     if st.button("Save today"):
         today = datetime.now().strftime("%Y-%m-%d")
@@ -166,51 +166,52 @@ elif st.session_state.page == "journey":
         daily_df.to_csv(DAILY_FILE, index=False)
         st.success("Thank you for sharing, Zara.")
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
 # ==================================================
-# WEEKLY REFLECTION
+# WEEKLY REFLECTION (LOCKED UNTIL 7 DAYS)
 # ==================================================
 elif st.session_state.page == "weekly":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h2>📝 Weekly Reflection</h2>", unsafe_allow_html=True)
+    st.markdown("## 📝 Weekly Reflection")
 
-    heavy = st.text_area("What felt heavy this week?", height=90)
-    helped = st.text_area("What helped, even a little?", height=90)
-    carry = st.text_area("What would you like to carry forward?", height=90)
+    if not weekly_available:
+        st.markdown(
+            "<p class='caption'>This space will open gently after a few days of journaling.</p>",
+            unsafe_allow_html=True
+        )
+    else:
+        heavy = st.text_area("What felt heavy this week?", height=90)
+        helped = st.text_area("What helped, even a little?", height=90)
+        carry = st.text_area("What would you like to carry forward?", height=90)
 
-    if st.button("Save weekly reflection"):
-        week_start = (datetime.now() - timedelta(days=datetime.now().weekday())).strftime("%Y-%m-%d")
-        weekly_df.loc[len(weekly_df)] = [week_start, heavy, helped, carry]
-        weekly_df.to_csv(WEEKLY_FILE, index=False)
-        st.success("Weekly reflection saved.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("Save weekly reflection"):
+            week_start = (datetime.now() - timedelta(days=datetime.now().weekday())).strftime("%Y-%m-%d")
+            weekly_df.loc[len(weekly_df)] = [week_start, heavy, helped, carry]
+            weekly_df.to_csv(WEEKLY_FILE, index=False)
+            st.success("Your week has been gently recorded.")
 
 # ==================================================
 # VIEWER WITH GRAPH + PDF
 # ==================================================
 elif st.session_state.page == "viewer":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h2>👀 Care View</h2>", unsafe_allow_html=True)
+    st.markdown("## 👀 Care View")
 
     password = st.text_input("Password", type="password")
     if password == VIEWER_PASSWORD:
 
-        st.subheader("📈 Gentle Progress Trend")
+        st.markdown("### 📈 Gentle Trend")
         fig, ax = plt.subplots()
         ax.plot(pd.to_datetime(daily_df["date"]), daily_df["score"], marker="o")
-        ax.set_ylabel("Gentle State (internal)")
+        ax.set_yticks([0,1,2,3])
+        ax.set_ylabel("Gentle state")
         ax.set_xlabel("Date")
+        ax.grid(alpha=0.3)
         st.pyplot(fig)
 
-        st.subheader("🗒️ Daily Reflections")
+        st.markdown("### 🗒️ Daily Reflections")
         st.dataframe(daily_df[["date", "choice", "note"]])
 
-        st.subheader("📝 Weekly Reflections")
+        st.markdown("### 📝 Weekly Reflections")
         st.dataframe(weekly_df)
 
-        # PDF EXPORT
         if st.button("📄 Export PDF"):
             fig_path = "progress.png"
             fig.savefig(fig_path)
@@ -219,24 +220,21 @@ elif st.session_state.page == "viewer":
             styles = getSampleStyleSheet()
             story = []
 
-            story.append(Paragraph("Zara’s Gentle Progress Report", styles["Title"]))
+            story.append(Paragraph("Zara’s Gentle Progress", styles["Title"]))
             story.append(Spacer(1, 12))
             story.append(Image(fig_path, width=400, height=200))
             story.append(Spacer(1, 12))
-            story.append(Paragraph("Weekly Reflections:", styles["Heading2"]))
 
             for _, row in weekly_df.iterrows():
                 story.append(Paragraph(f"<b>Week of {row['week_start']}</b>", styles["Normal"]))
                 story.append(Paragraph(f"Heavy: {row['heavy']}", styles["Normal"]))
                 story.append(Paragraph(f"Helped: {row['helped']}", styles["Normal"]))
-                story.append(Paragraph(f"Carry forward: {row['carry']}", styles["Normal"]))
+                story.append(Paragraph(f"Carry: {row['carry']}", styles["Normal"]))
                 story.append(Spacer(1, 10))
 
             doc.build(story)
-            st.success("PDF generated.")
+            st.success("PDF ready.")
             st.download_button("⬇️ Download PDF", open(PDF_FILE, "rb"), file_name=PDF_FILE)
 
     else:
         st.warning("Access restricted.")
-
-    st.markdown("</div>", unsafe_allow_html=True)

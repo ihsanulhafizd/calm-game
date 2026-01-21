@@ -37,48 +37,47 @@ def go(page):
     st.session_state.page = page
 
 # ==================================================
-# LANGUAGE TEXT
+# LANGUAGE COPY
 # ==================================================
 TEXT = {
     "id": {
         "title": "Zara’s Gentle Space",
         "landing": (
             "Sayang,\n\n"
-            "Tidak ada yang perlu kamu buktikan hari ini.\n"
-            "Tidak ada target, tidak ada tuntutan.\n\n"
-            "Tempat ini dibuat untuk menemanimu,\n"
-            "bukan untuk menilaimu.\n\n"
-            "Tarik napas pelan.\n"
-            "Kamu aman di sini."
+            "Hari ini kamu tidak diminta menjadi apa pun.\n"
+            "Tidak perlu lebih kuat, tidak perlu lebih baik.\n\n"
+            "Ruang ini tidak ingin mengubahmu.\n"
+            "Ia hanya ingin menemanimu.\n\n"
+            "Kamu boleh masuk kapan pun kamu siap."
         ),
-        "read": "Aku sudah membaca dan memahami pesan ini",
+        "read": "Aku sudah membaca pesan ini",
         "start": "Awal",
-        "question": "Hari ini terasa seperti apa?",
+        "daily_title": "Bagaimana hari ini terasa?",
         "choices": [
             "Aku minum obat tidur",
             "Aku menunda atau mengurangi",
             "Aku tidak membutuhkannya",
-            "Hari ini berat, aku beristirahat"
+            "Hari ini terasa berat, aku beristirahat"
         ],
-        "note": "Kalau kamu mau, ceritakan sedikit alasannya:",
+        "note": "Kalau kamu ingin, kamu boleh menuliskan sedikit ceritanya:",
         "save": "Simpan hari ini",
         "thank_title": "Terima kasih, Zara",
         "thank_text": (
             "Terima kasih sudah berhenti sejenak hari ini.\n\n"
-            "Apa pun pilihanmu, itu bukan tanda kegagalan.\n"
-            "Itu adalah bentuk kejujuran dan keberanian.\n\n"
-            "Kamu tidak perlu berubah dengan cepat.\n"
-            "Kamu hanya perlu terus ada.\n\n"
-            "Tempat ini akan menunggumu,\n"
-            "besok, atau kapan pun kamu siap."
+            "Apa pun yang kamu pilih tadi,\n"
+            "itu bukan ukuran keberhasilan atau kegagalan.\n\n"
+            "Itu hanya cerminan dari apa yang kamu butuhkan.\n\n"
+            "Ruang ini akan tetap ada.\n"
+            "Tidak mendesak. Tidak menuntut."
         ),
-        "back": "Kembali Besok",
+        "back": "Kembali",
         "weekly_title": "Refleksi Mingguan",
-        "weekly_locked": "Bagian ini akan terbuka dengan sendirinya setelah beberapa hari.",
+        "weekly_info": "Bagian ini bukan evaluasi, hanya ruang melihat ke belakang dengan lembut.",
         "weekly_q1": "Apa yang terasa paling berat minggu ini?",
         "weekly_q2": "Apa yang sedikit membantu?",
         "weekly_q3": "Apa yang ingin kamu bawa ke minggu depan?",
         "weekly_save": "Simpan refleksi",
+        "weekly_locked": "Refleksi mingguan akan terbuka setelah beberapa hari.",
         "viewer_title": "Mode Pemantau (Pribadi)",
         "password": "Password",
         "export": "Export PDF"
@@ -87,41 +86,40 @@ TEXT = {
         "title": "Zara’s Gentle Space",
         "landing": (
             "My love,\n\n"
-            "There is nothing you need to prove today.\n"
-            "No targets. No expectations.\n\n"
-            "This space exists to stay with you,\n"
-            "not to judge you.\n\n"
-            "Take a slow breath.\n"
-            "You are safe here."
+            "Today, you are not asked to be anything.\n"
+            "Not stronger. Not better.\n\n"
+            "This space does not try to change you.\n"
+            "It only wishes to stay with you.\n\n"
+            "You may enter whenever you feel ready."
         ),
-        "read": "I have read and understood this message",
+        "read": "I have read this message",
         "start": "Begin",
-        "question": "How did today feel?",
+        "daily_title": "How did today feel?",
         "choices": [
             "I took my sleep medication",
             "I delayed or reduced it",
             "I didn’t need it",
             "Today felt heavy, I rested"
         ],
-        "note": "If you want, you can share a little why:",
+        "note": "If you wish, you may share a little of what led to this:",
         "save": "Save today",
         "thank_title": "Thank you, Zara",
         "thank_text": (
             "Thank you for pausing today.\n\n"
-            "Whatever you chose, it is not a failure.\n"
-            "It is honesty, and that takes courage.\n\n"
-            "You don’t need to change quickly.\n"
-            "You only need to keep showing up.\n\n"
-            "This space will wait for you,\n"
-            "tomorrow, or whenever you’re ready."
+            "Whatever you chose earlier\n"
+            "is not a measure of success or failure.\n\n"
+            "It simply reflects what you needed.\n\n"
+            "This space remains.\n"
+            "Quiet. Unrushed."
         ),
-        "back": "Come back tomorrow",
+        "back": "Back",
         "weekly_title": "Weekly Reflection",
-        "weekly_locked": "This space will open gently after a few days.",
+        "weekly_info": "This is not a review, just a gentle look back.",
         "weekly_q1": "What felt heaviest this week?",
         "weekly_q2": "What helped, even a little?",
         "weekly_q3": "What would you like to carry into next week?",
         "weekly_save": "Save reflection",
+        "weekly_locked": "Weekly reflection will open after a few days.",
         "viewer_title": "Private Observer Mode",
         "password": "Password",
         "export": "Export PDF"
@@ -131,7 +129,7 @@ TEXT = {
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE (NO SCROLL, CLEAN)
+# STYLE (TIGHT & CLEAN)
 # ==================================================
 st.markdown("""
 <style>
@@ -141,19 +139,32 @@ html, body, [class*="css"] {
     font-family: Inter, sans-serif;
 }
 .block-container {
-    max-width: 720px;
-    padding-top: 2.5rem;
+    max-width: 700px;
+    padding-top: 1.8rem;
 }
 .caption {
     color: #6b7280;
-    font-size: 15px;
-    line-height: 1.8;
+    font-size: 14.5px;
+    line-height: 1.65;
 }
 button {
-    border-radius: 20px !important;
+    border-radius: 16px !important;
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ==================================================
+# LANGUAGE TOGGLE (TOP RIGHT)
+# ==================================================
+top_left, top_right = st.columns([5,1])
+with top_right:
+    lang = st.selectbox(
+        "Language",
+        ["Indonesia", "English"],
+        index=0 if st.session_state.lang == "id" else 1,
+        label_visibility="collapsed"
+    )
+    st.session_state.lang = "id" if lang == "Indonesia" else "en"
 
 # ==================================================
 # DATA INIT
@@ -176,17 +187,6 @@ if not daily_df.empty:
         weekly_available = True
 
 # ==================================================
-# LANGUAGE TOGGLE
-# ==================================================
-c1, c2 = st.columns(2)
-with c1:
-    if st.button("🇮🇩"):
-        st.session_state.lang = "id"
-with c2:
-    if st.button("🇺🇸"):
-        st.session_state.lang = "en"
-
-# ==================================================
 # VIEWER MODE (PRIVATE URL)
 # ==================================================
 viewer_mode = st.query_params.get("viewer") == "true"
@@ -199,17 +199,18 @@ if viewer_mode:
         st.dataframe(daily_df)
         st.dataframe(weekly_df)
 
-        fig, ax = plt.subplots()
-        ax.plot(pd.to_datetime(daily_df["date"]), daily_df["score"], marker="o")
-        ax.grid(alpha=0.3)
-        st.pyplot(fig)
+        if not daily_df.empty:
+            fig, ax = plt.subplots()
+            ax.plot(pd.to_datetime(daily_df["date"]), daily_df["score"], marker="o")
+            ax.grid(alpha=0.3)
+            st.pyplot(fig)
 
         if st.button(T["export"]):
             fig_path = "progress.png"
             fig.savefig(fig_path)
             doc = SimpleDocTemplate(PDF_FILE, pagesize=A4)
             styles = getSampleStyleSheet()
-            story = [Paragraph("Zara’s Private Report", styles["Title"]), Spacer(1, 12), Image(fig_path, 400, 200)]
+            story = [Paragraph("Zara’s Private Journal Summary", styles["Title"]), Spacer(1, 12), Image(fig_path, 400, 200)]
             doc.build(story)
             st.download_button("⬇️ Download PDF", open(PDF_FILE, "rb"), file_name=PDF_FILE)
 
@@ -225,9 +226,9 @@ else:
             go("daily")
 
     elif st.session_state.page == "daily":
-        st.markdown(f"## 🤍 {T['question']}")
+        st.markdown(f"## 🤍 {T['daily_title']}")
         choice = st.radio("", T["choices"])
-        note = st.text_area(T["note"], height=120)
+        note = st.text_area(T["note"], height=100)
         if st.button(T["save"]):
             today = datetime.now().strftime("%Y-%m-%d")
             score = T["choices"].index(choice)
@@ -240,3 +241,20 @@ else:
         st.markdown(f"<p class='caption'>{T['thank_text']}</p>", unsafe_allow_html=True)
         if st.button(T["back"]):
             go("landing")
+
+    elif st.session_state.page == "weekly":
+        st.markdown(f"## {T['weekly_title']}")
+        st.markdown(f"<p class='caption'>{T['weekly_info']}</p>", unsafe_allow_html=True)
+
+        if not weekly_available:
+            st.markdown(f"<p class='caption'>{T['weekly_locked']}</p>", unsafe_allow_html=True)
+        else:
+            heavy = st.text_area(T["weekly_q1"], height=80)
+            helped = st.text_area(T["weekly_q2"], height=80)
+            carry = st.text_area(T["weekly_q3"], height=80)
+
+            if st.button(T["weekly_save"]):
+                week_start = (datetime.now() - timedelta(days=datetime.now().weekday())).strftime("%Y-%m-%d")
+                weekly_df.loc[len(weekly_df)] = [week_start, heavy, helped, carry]
+                weekly_df.to_csv(WEEKLY_FILE, index=False)
+                go("thanks")

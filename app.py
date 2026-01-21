@@ -32,29 +32,14 @@ def go(page):
     st.session_state.page = page
 
 # ==================================================
-# HELPER: PAGE COLOR
-# ==================================================
-def set_bg(color):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-color: {color};
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# ==================================================
-# DATE & DAY
+# DATE
 # ==================================================
 now = datetime.now()
 weekday = now.strftime("%A")
 today_str = now.strftime("%d %B")
 
 # ==================================================
-# DAILY & BIRTHDAY MESSAGES
+# MESSAGES
 # ==================================================
 DAILY_EN = {
     "Monday": "Take today slowly. I’m right here with you.",
@@ -78,7 +63,7 @@ DAILY_ID = {
 
 BIRTHDAY_EN = (
     "🎉 Happy Birthday, my love.\n\n"
-    "Today the world is brighter because you exist.\n\n"
+    "Today the world feels brighter because you exist.\n\n"
     "You don’t need to be strong today.\n"
     "Just be.\n\n"
     "You are deeply loved."
@@ -86,7 +71,7 @@ BIRTHDAY_EN = (
 
 BIRTHDAY_ID = (
     "🎉 Selamat ulang tahun, sayang.\n\n"
-    "Hari ini dunia lebih hangat karena kamu ada.\n\n"
+    "Hari ini dunia terasa lebih hangat karena kamu ada.\n\n"
     "Hari ini kamu tidak perlu kuat.\n"
     "Cukup jadi dirimu.\n\n"
     "Kamu sangat dicintai."
@@ -145,41 +130,88 @@ TEXT = {
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE (MINIMAL)
+# STYLE (FADE + DARK MODE SAFE)
 # ==================================================
 st.markdown("""
 <style>
-.block-container { max-width: 620px; padding-top: 1.4rem; }
-p { line-height: 1.6; }
-.lang { font-size: 13px; text-align: right; }
-.lang span { cursor: pointer; margin-left: 6px; }
-.active { font-weight: 600; color: #111827; }
-.inactive { color: #9ca3af; }
-button { border-radius: 16px !important; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.block-container {
+  max-width: 620px;
+  padding-top: 1.4rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Light & Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .stApp {
+    background-color: #0f172a;
+  }
+  p, h1, h2, h3 {
+    color: #e5e7eb;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .stApp {
+    background-color: #fefcf8;
+  }
+  p, h1, h2, h3 {
+    color: #111827;
+  }
+}
+
+.lang {
+  font-size: 13px;
+  text-align: right;
+}
+
+.lang span {
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.active {
+  font-weight: 600;
+  color: inherit;
+}
+
+.inactive {
+  opacity: 0.5;
+}
+
+button {
+  border-radius: 16px !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH (ELEGANT INLINE)
+# LANGUAGE SWITCH (INLINE)
 # ==================================================
 _, lang_col = st.columns([4,2])
 with lang_col:
     st.markdown(
         f"""
         <div class="lang">
-        Language:
-        <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
-              onclick="window.location.hash='en'">English</span> |
-        <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
-              onclick="window.location.hash='id'">Indonesia</span>
+          Language:
+          <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
+                onclick="document.getElementById('lang_en').click()">English</span> |
+          <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
+                onclick="document.getElementById('lang_id').click()">Indonesia</span>
         </div>
         """,
         unsafe_allow_html=True
     )
-
-# Streamlit-safe language change
-if st.session_state.get("lang_change"):
-    st.session_state.lang = st.session_state.lang_change
+    st.button("English", key="lang_en", on_click=lambda: st.session_state.update(lang="en"))
+    st.button("Indonesia", key="lang_id", on_click=lambda: st.session_state.update(lang="id"))
 
 # ==================================================
 # DATA INIT
@@ -193,14 +225,12 @@ daily_df = pd.read_csv(DAILY_FILE)
 # FLOW
 # ==================================================
 if st.session_state.page == "landing":
-    set_bg("#fefcf8")  # cream
     st.markdown(f"## 💗 {T['title']}")
     st.markdown(T["landing"])
     if st.button(T["start"]):
         go("daily")
 
 elif st.session_state.page == "daily":
-    set_bg("#fff7ed")  # soft peach
     st.markdown(f"### {T['daily']}")
     st.markdown(T["message"])
     choice = st.radio("", T["choices"])
@@ -216,7 +246,6 @@ elif st.session_state.page == "daily":
         go("thanks")
 
 elif st.session_state.page == "thanks":
-    set_bg("#fff1f2")  # soft pink
     st.markdown(T["thanks"])
     if st.button("OK"):
         go("landing")

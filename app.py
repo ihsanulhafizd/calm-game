@@ -17,15 +17,15 @@ st.set_page_config(
 )
 
 # ==================================================
-# SESSION STATE
+# STATE
 # ==================================================
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 if "lang" not in st.session_state:
     st.session_state.lang = "en"
 
-def go(page):
-    st.session_state.page = page
+def go(p):
+    st.session_state.page = p
 
 # ==================================================
 # DATE
@@ -35,7 +35,7 @@ weekday = now.strftime("%A")
 today_str = now.strftime("%d %B")
 
 # ==================================================
-# MESSAGES
+# TEXT
 # ==================================================
 DAILY_EN = {
     "Monday": "Take today slowly. I’m right here with you.",
@@ -57,38 +57,16 @@ DAILY_ID = {
     "Sunday": "Apa pun besok, kamu tidak sendirian."
 }
 
-BIRTHDAY_EN = (
-    "🎉 Happy Birthday, my love.\n\n"
-    "Today the world feels brighter because you exist.\n\n"
-    "You don’t need to be strong today.\n"
-    "Just be.\n\n"
-    "You are deeply loved."
-)
+BIRTHDAY_EN = "🎉 Happy Birthday, my love.\n\nToday is for you."
+BIRTHDAY_ID = "🎉 Selamat ulang tahun, sayang.\n\nHari ini tentang kamu."
 
-BIRTHDAY_ID = (
-    "🎉 Selamat ulang tahun, sayang.\n\n"
-    "Hari ini dunia terasa lebih hangat karena kamu ada.\n\n"
-    "Hari ini kamu tidak perlu kuat.\n"
-    "Cukup jadi dirimu.\n\n"
-    "Kamu sangat dicintai."
-)
-
-# ==================================================
-# TEXT
-# ==================================================
 TEXT = {
     "en": {
         "title": APP_TITLE_EN,
-        "landing": (
-            "My love,\n\n"
-            "This space exists only to stay with you.\n"
-            "No fixing. No proving.\n\n"
-            "Just presence.\n\n"
-            "I’m here."
-        ),
+        "landing": "My love,\n\nThis space exists only to stay with you.\n\nI’m here.",
         "start": "Come in",
         "daily": "How does today feel?",
-        "message": BIRTHDAY_EN if today_str == "27 February" else DAILY_EN.get(weekday, ""),
+        "msg": BIRTHDAY_EN if today_str == "27 February" else DAILY_EN.get(weekday, ""),
         "choices": [
             "I took my sleep medication",
             "I delayed or reduced it",
@@ -97,20 +75,14 @@ TEXT = {
         ],
         "note": "If you want, write a few words:",
         "save": "Save",
-        "thanks": "Thank you for being here today.\n\nI’m proud of you."
+        "thanks": "Thank you for being here.\n\nI’m proud of you."
     },
     "id": {
         "title": APP_TITLE_ID,
-        "landing": (
-            "Sayang,\n\n"
-            "Ruang ini ada untuk menemanimu.\n"
-            "Tanpa tuntutan.\n\n"
-            "Hanya kehadiran.\n\n"
-            "Aku di sini."
-        ),
+        "landing": "Sayang,\n\nRuang ini ada untuk menemanimu.\n\nAku di sini.",
         "start": "Masuk",
         "daily": "Bagaimana hari ini terasa?",
-        "message": BIRTHDAY_ID if today_str == "27 February" else DAILY_ID.get(weekday, ""),
+        "msg": BIRTHDAY_ID if today_str == "27 February" else DAILY_ID.get(weekday, ""),
         "choices": [
             "Aku minum obat tidur",
             "Aku menunda atau mengurangi",
@@ -119,18 +91,18 @@ TEXT = {
         ],
         "note": "Kalau mau, tuliskan sedikit:",
         "save": "Simpan",
-        "thanks": "Terima kasih sudah hadir hari ini.\n\nAku bangga padamu."
+        "thanks": "Terima kasih sudah hadir.\n\nAku bangga padamu."
     }
 }
 
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE — FONT + DECORATION
+# STYLE + ANIMATION
 # ==================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
@@ -138,19 +110,16 @@ html, body, [class*="css"] {
 
 h1, h2, h3 {
     font-family: 'Playfair Display', serif;
-    letter-spacing: -0.01em;
 }
 
 .block-container {
     max-width: 620px;
-    padding-top: 1.6rem;
+    padding-top: 1.5rem;
 }
 
-/* Language */
 .lang {
-    text-align: right;
     font-size: 13px;
-    color: #6b7280;
+    text-align: right;
     margin-bottom: 1rem;
 }
 
@@ -159,83 +128,60 @@ h1, h2, h3 {
     margin-left: 6px;
 }
 
-.active {
-    font-weight: 600;
-    color: #111827;
-}
+.active { font-weight: 600; }
+.inactive { opacity: 0.45; }
 
-.inactive {
-    color: #9ca3af;
-}
-
-/* Floating stars */
-.star {
+/* Fireflies */
+.firefly {
     position: fixed;
-    top: -10px;
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    animation: fall 20s linear infinite;
+    width: 6px;
+    height: 6px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: float 30s linear infinite;
 }
 
-@keyframes fall {
-    to {
-        transform: translateY(110vh);
-    }
-}
-
-/* Butterfly */
-.butterfly {
-    position: fixed;
-    left: -50px;
-    top: 40%;
-    font-size: 18px;
-    opacity: 0.15;
-    animation: fly 25s linear infinite;
-}
-
-@keyframes fly {
-    to {
-        transform: translateX(120vw);
-    }
-}
-
-button {
-    border-radius: 14px !important;
+@keyframes float {
+    0%   { transform: translate(-10vw, 110vh); opacity: 0; }
+    20%  { opacity: 0.6; }
+    80%  { opacity: 0.4; }
+    100% { transform: translate(110vw, -10vh); opacity: 0; }
 }
 </style>
 
-<div class="star" style="left:10%">✦</div>
-<div class="star" style="left:40%">✧</div>
-<div class="star" style="left:70%">✦</div>
-<div class="butterfly">🦋</div>
+<div class="firefly" style="left:20%; animation-duration:26s;"></div>
+<div class="firefly" style="left:50%; animation-duration:32s;"></div>
+<div class="firefly" style="left:75%; animation-duration:28s;"></div>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH — EN | ID
+# LANGUAGE SWITCH (INLINE ONLY)
 # ==================================================
 _, lang_col = st.columns([4,2])
 with lang_col:
     st.markdown(
         f"""
         <div class="lang">
-            <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
-                  onclick="document.getElementById('en').click()">EN</span> |
-            <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
-                  onclick="document.getElementById('id').click()">ID</span>
+          <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
+                onclick="document.getElementById('btn_en').click()">EN</span> |
+          <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
+                onclick="document.getElementById('btn_id').click()">ID</span>
         </div>
         """,
         unsafe_allow_html=True
     )
-    st.button("EN", key="en", on_click=lambda: st.session_state.update(lang="en"))
-    st.button("ID", key="id", on_click=lambda: st.session_state.update(lang="id"))
+
+    st.button("EN", key="btn_en", on_click=lambda: st.session_state.update(lang="en"), help="", args=None)
+    st.button("ID", key="btn_id", on_click=lambda: st.session_state.update(lang="id"), help="", args=None)
 
 # ==================================================
-# DATA INIT
+# DATA
 # ==================================================
 if not os.path.exists(DAILY_FILE):
     pd.DataFrame(columns=["date","time","choice","note"]).to_csv(DAILY_FILE, index=False)
 
-daily_df = pd.read_csv(DAILY_FILE)
+df = pd.read_csv(DAILY_FILE)
 
 # ==================================================
 # FLOW
@@ -248,17 +194,17 @@ if st.session_state.page == "landing":
 
 elif st.session_state.page == "daily":
     st.markdown(f"### {T['daily']}")
-    st.markdown(T["message"])
+    st.markdown(T["msg"])
     choice = st.radio("", T["choices"])
     note = st.text_area(T["note"], height=80)
     if st.button(T["save"]):
-        daily_df.loc[len(daily_df)] = [
+        df.loc[len(df)] = [
             now.strftime("%Y-%m-%d"),
             now.strftime("%H:%M:%S"),
             choice,
             note
         ]
-        daily_df.to_csv(DAILY_FILE, index=False)
+        df.to_csv(DAILY_FILE, index=False)
         go("thanks")
 
 elif st.session_state.page == "thanks":

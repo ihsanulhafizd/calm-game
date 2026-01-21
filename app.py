@@ -4,11 +4,8 @@ from datetime import datetime
 import os
 
 # ==================================================
-# IDENTITAS
+# BASIC CONFIG
 # ==================================================
-FULL_NAME = "Azzahra Muhabbah Zain"
-VIEWER_PASSWORD = "06september2025"
-
 APP_TITLE_EN = "For Zara, Always"
 APP_TITLE_ID = "Untuk Zara, Selalu"
 
@@ -32,14 +29,14 @@ def go(page):
     st.session_state.page = page
 
 # ==================================================
-# DATE
+# DATE LOGIC
 # ==================================================
 now = datetime.now()
 weekday = now.strftime("%A")
 today_str = now.strftime("%d %B")
 
 # ==================================================
-# MESSAGES
+# DAILY MESSAGES
 # ==================================================
 DAILY_EN = {
     "Monday": "Take today slowly. I’m right here with you.",
@@ -78,7 +75,7 @@ BIRTHDAY_ID = (
 )
 
 # ==================================================
-# TEXT
+# TEXT CONTENT
 # ==================================================
 TEXT = {
     "en": {
@@ -130,88 +127,79 @@ TEXT = {
 T = TEXT[st.session_state.lang]
 
 # ==================================================
-# STYLE (FADE + DARK MODE SAFE)
+# STYLE — TYPOGRAPHY & SPACING (FIXED)
 # ==================================================
 st.markdown("""
 <style>
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .block-container {
-  max-width: 620px;
-  padding-top: 1.4rem;
-  animation: fadeIn 0.8s ease-out;
+    max-width: 620px;
+    padding-top: 1.6rem;
+    padding-bottom: 2rem;
+}
+
+h1, h2, h3 {
+    letter-spacing: -0.01em;
 }
 
 p {
-  line-height: 1.6;
-}
-
-/* Light & Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .stApp {
-    background-color: #0f172a;
-  }
-  p, h1, h2, h3 {
-    color: #e5e7eb;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  .stApp {
-    background-color: #fefcf8;
-  }
-  p, h1, h2, h3 {
-    color: #111827;
-  }
+    line-height: 1.65;
+    font-size: 15px;
+    margin-bottom: 1rem;
 }
 
 .lang {
-  font-size: 13px;
-  text-align: right;
+    font-size: 13px;
+    color: #6b7280;
+    text-align: right;
+    margin-bottom: 1.2rem;
 }
 
 .lang span {
-  cursor: pointer;
-  margin-left: 6px;
+    cursor: pointer;
+    margin-left: 6px;
 }
 
-.active {
-  font-weight: 600;
-  color: inherit;
+.lang .active {
+    font-weight: 600;
+    color: #111827;
 }
 
-.inactive {
-  opacity: 0.5;
+.lang .inactive {
+    color: #9ca3af;
 }
 
 button {
-  border-radius: 16px !important;
+    border-radius: 14px !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LANGUAGE SWITCH (INLINE)
+# LANGUAGE SWITCH — EXACT TEXT STYLE
 # ==================================================
 _, lang_col = st.columns([4,2])
 with lang_col:
     st.markdown(
         f"""
         <div class="lang">
-          Language:
-          <span class="{'active' if st.session_state.lang=='en' else 'inactive'}"
-                onclick="document.getElementById('lang_en').click()">English</span> |
-          <span class="{'active' if st.session_state.lang=='id' else 'inactive'}"
-                onclick="document.getElementById('lang_id').click()">Indonesia</span>
+            Language:
+            <span class="{'active' if st.session_state.lang=='en' else 'inactive'}">English</span> |
+            <span class="{'active' if st.session_state.lang=='id' else 'inactive'}">Indonesia</span>
         </div>
         """,
         unsafe_allow_html=True
     )
-    st.button("English", key="lang_en", on_click=lambda: st.session_state.update(lang="en"))
-    st.button("Indonesia", key="lang_id", on_click=lambda: st.session_state.update(lang="id"))
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button("English", key="lang_en", on_click=lambda: st.session_state.update(lang="en"))
+    with col2:
+        st.button("Indonesia", key="lang_id", on_click=lambda: st.session_state.update(lang="id"))
 
 # ==================================================
 # DATA INIT

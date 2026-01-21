@@ -7,17 +7,58 @@ import requests
 from streamlit_lottie import st_lottie
 
 # ==================================================
+# PAGE CONFIG
+# ==================================================
+st.set_page_config(
+    page_title="Gentle Living Journey",
+    page_icon="🌙",
+    layout="centered"
+)
+
+# ==================================================
+# SOFT UI STYLE (LOFT / GALLERY FEEL)
+# ==================================================
+st.markdown("""
+<style>
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+    background-color: #f6f7f4;
+}
+.block-container {
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+    max-width: 720px;
+}
+h1, h2, h3 {
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+.card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+}
+.caption {
+    color: #6b7280;
+    font-size: 13px;
+}
+button[kind="primary"] {
+    border-radius: 14px;
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ==================================================
 # CONFIG
 # ==================================================
 PLAYER_NAME = "Zara"
 VIEWER_PASSWORD = "calm123"
 DATA_FILE = "journey.csv"
-
-st.set_page_config(
-    page_title="🌱 Gentle Living Journey",
-    page_icon="🌙",
-    layout="centered"
-)
 
 # ==================================================
 # LOAD LOTTIE
@@ -38,9 +79,7 @@ world_night = load_lottie("https://assets2.lottiefiles.com/packages/lf20_3rwasyj
 world_dawn = load_lottie("https://assets4.lottiefiles.com/packages/lf20_jmBauI.json")
 world_garden = load_lottie("https://assets6.lottiefiles.com/packages/lf20_x62chJ.json")
 
-# ==================================================
-# DIALOGUE
-# ==================================================
+# Dialogue
 DIALOGUE = [
     "I’m here with you.",
     "There is no rush.",
@@ -65,99 +104,88 @@ total_steps = df["step"].sum() if not df.empty else 0
 # ==================================================
 if total_steps < 20:
     world_anim = world_night
-    world_text = "🌙 The world feels quiet and safe."
+    world_text = "The world feels quiet and safe."
 elif total_steps < 50:
     world_anim = world_dawn
-    world_text = "🌅 Light is slowly appearing."
+    world_text = "Light is slowly appearing."
 else:
     world_anim = world_garden
-    world_text = "🌿 The world feels warm and alive."
+    world_text = "The world feels warm and alive."
 
 # ==================================================
 # MODE
 # ==================================================
-mode = st.sidebar.radio("Mode", ["🎮 Journey", "👀 Companion View"])
+mode = st.sidebar.radio("Mode", ["Journey", "Companion View"])
 
 # ==================================================
 # PLAYER MODE
 # ==================================================
-if mode == "🎮 Journey":
-    st.title(f"🌱 Gentle Living Journey with {PLAYER_NAME}")
-    st.caption("A calm shared space. Nothing to complete.")
+if mode == "Journey":
+    st.markdown(f"<h1>🌱 Gentle Living Journey</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p class='caption'>A calm space for {PLAYER_NAME}. Nothing to complete.</p>", unsafe_allow_html=True)
 
-    # 🌫️ VISUAL AMBIENCE FIRST (INI YANG MEMBERI FEEL MALL)
-    st.markdown("### 🌫️ Ambient Space")
-    st.caption("A quiet public space feeling, like a calm mall or loft.")
-
-    # 🎧 SOUND (STREAMLIT SAFE)
+    # Ambient
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown("🌫️ **Ambient Space**")
     st.audio(
         "https://cdn.pixabay.com/download/audio/2022/10/30/audio_4f98c8f6bb.mp3?filename=lofi-ambient-121073.mp3",
         format="audio/mp3"
     )
-    st.caption("▶️ Tap once to start soft loft ambience.")
+    st.markdown("<p class='caption'>Soft background ambience. Tap once to play.</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🌍 WORLD
-    st.markdown("### 🌍 The World")
-    st_lottie(world_anim, height=220)
-    st.caption(world_text)
+    # World
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown("🌍 **The World**")
+    st_lottie(world_anim, height=200)
+    st.markdown(f"<p class='caption'>{world_text}</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🤍 COMPANION
-    st.markdown("### 🤍 Your Companion")
+    # Companion
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown("🤍 **Your Companion**")
 
     choice = st.radio(
         "",
-        [
-            "🌱 Sit together quietly",
-            "🚶 Walk a little",
-            "🌙 Rest and stay still"
-        ]
+        ["Sit quietly together", "Walk a little", "Rest and stay still"],
+        label_visibility="collapsed"
     )
 
     step = 0
     animation = lottie_idle
 
-    if choice == "🌱 Sit together quietly":
+    if choice == "Sit quietly together":
         step = 1
         animation = lottie_idle
-    elif choice == "🚶 Walk a little":
+    elif choice == "Walk a little":
         step = 2
         animation = lottie_walk
-    elif choice == "🌙 Rest and stay still":
+    else:
         step = 0
         animation = lottie_rest
 
-    st_lottie(animation, height=260)
+    st_lottie(animation, height=240)
 
-    if st.button("✨ Stay in this moment"):
+    if st.button("Stay in this moment"):
         today = datetime.now().strftime("%Y-%m-%d")
-        df = pd.concat(
-            [df, pd.DataFrame([[today, step, choice]], columns=["date", "step", "choice"])],
-            ignore_index=True
-        )
+        df = pd.concat([df, pd.DataFrame([[today, step, choice]], columns=df.columns)])
         df.to_csv(DATA_FILE, index=False)
 
         st.success(random.choice(DIALOGUE))
         st.progress(min((total_steps + step) / 100, 1.0))
 
-    st.info(
-        "💬 This space does not ask anything of you.\n\n"
-        "💚 You are allowed to simply be here."
-    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
 # VIEWER MODE
 # ==================================================
-if mode == "👀 Companion View":
-    st.title("👀 Journey Overview")
+if mode == "Companion View":
+    st.markdown("<h2>👀 Journey Overview</h2>", unsafe_allow_html=True)
+    password = st.text_input("Password", type="password")
 
-    password = st.text_input("Viewer Password", type="password")
-
-    if password != VIEWER_PASSWORD:
-        st.warning("Enter the correct password.")
+    if password == VIEWER_PASSWORD:
+        st.dataframe(df)
+        st.metric("Total Gentle Steps", total_steps)
+        st.line_chart(df.set_index("date")["step"])
     else:
-        st.success("Access granted")
-
-        if not df.empty:
-            st.dataframe(df)
-            st.metric("Total Gentle Steps", total_steps)
-            st.line_chart(df.set_index("date")["step"])
+        st.warning("Enter correct password.")

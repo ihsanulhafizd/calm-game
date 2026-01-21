@@ -3,96 +3,114 @@ import pandas as pd
 from datetime import datetime
 import os
 
-# =====================
-# KONFIGURASI DASAR
-# =====================
-PLAYER_NAME = "Zara"   # ganti ke "Sayang" jika mau
-DATA_FILE = "data.csv"
+# =========================
+# CONFIG
+# =========================
+PLAYER_NAME = "Zara"     # ganti ke "Sayang" kalau mau
+VIEWER_PASSWORD = "calm123"
+DATA_FILE = "journey.csv"
 
 st.set_page_config(
-    page_title="🌱 Calm Game",
+    page_title="🌱 A Gentle Journey",
     page_icon="🌙",
     layout="centered"
 )
 
-# =====================
-# LOAD / INIT DATA
-# =====================
+# =========================
+# INIT DATA
+# =========================
 if not os.path.exists(DATA_FILE):
-    df = pd.DataFrame(columns=["tanggal", "poin"])
+    df = pd.DataFrame(columns=["date", "step"])
     df.to_csv(DATA_FILE, index=False)
 else:
     df = pd.read_csv(DATA_FILE)
 
-# =====================
-# PILIH MODE
-# =====================
-mode = st.sidebar.selectbox(
-    "Mode",
-    ["🎮 Player", "👀 Viewer"]
-)
+total_steps = df["step"].sum() if not df.empty else 0
 
-# =====================
+# =========================
+# MODE SELECT
+# =========================
+mode = st.sidebar.radio("Mode", ["🎮 Journey", "👀 Companion View"])
+
+# =========================
 # PLAYER MODE
-# =====================
-if mode == "🎮 Player":
-    st.title(f"🌱 Calm Game untuk {PLAYER_NAME}")
-    st.caption("Setiap langkah kecil itu berarti 💚")
+# =========================
+if mode == "🎮 Journey":
+    st.title(f"🌱 A Gentle Journey for {PLAYER_NAME}")
+    st.caption("No goals. No pressure. Just moving gently together.")
 
-    st.markdown("### 📝 Daily Check-in")
+    st.markdown("### 🌿 Where would you like to be today?")
 
-    jujur = st.checkbox("Aku jujur hari ini")
-    tunda = st.checkbox("Aku menunda obat")
-    alternatif = st.checkbox("Aku mencoba cara lain")
-    tenang = st.checkbox("Tidur terasa lebih tenang")
-    ngobrol = st.checkbox("Aku mau ngobrol")
-    hari_berat = st.checkbox("Hari ini terasa berat")
+    choice = st.radio(
+        "",
+        [
+            "🌱 Sit quietly together",
+            "🚶 Walk a little",
+            "🌤️ Look at the sky",
+            "🛌 Rest and stay still"
+        ]
+    )
 
-    poin = 0
-    if jujur: poin += 2
-    if tunda: poin += 1
-    if alternatif: poin += 1
-    if tenang: poin += 1
-    if ngobrol: poin += 2
-    if hari_berat: poin -= 1
-    if poin < 0: poin = 0
+    step = 0
+    message = ""
 
-    if poin < 10:
-        level = "🌱 Seedling"
-        pesan = "Pelan-pelan itu tidak apa-apa."
-    elif poin < 20:
-        level = "🌿 Growing"
-        pesan = "Progres kamu konsisten."
-    elif poin < 30:
-        level = "☀️ Stable"
-        pesan = "Kamu semakin stabil."
-    else:
-        level = "🌟 Strong"
-        pesan = "Kamu luar biasa."
+    if choice == "🌱 Sit quietly together":
+        step = 1
+        message = "Being present is already a step."
+    elif choice == "🚶 Walk a little":
+        step = 2
+        message = "A gentle movement forward."
+    elif choice == "🌤️ Look at the sky":
+        step = 1
+        message = "Sometimes looking up is enough."
+    elif choice == "🛌 Rest and stay still":
+        step = 0
+        message = "Resting is not falling behind."
 
-    if st.button("✨ Selesai Hari Ini"):
+    if st.button("✨ Stay here today"):
         today = datetime.now().strftime("%Y-%m-%d")
-        new_row = pd.DataFrame([[today, poin]], columns=["tanggal", "poin"])
-        df = pd.concat([df, new_row], ignore_index=True)
+        df = pd.concat(
+            [df, pd.DataFrame([[today, step]], columns=["date", "step"])],
+            ignore_index=True
+        )
         df.to_csv(DATA_FILE, index=False)
 
-        st.success(f"Terima kasih sudah berusaha hari ini, {PLAYER_NAME} 🌱")
-        st.progress(min(poin / 30, 1.0))
-        st.markdown(f"**Level:** {level}")
-        st.caption(pesan)
+        st.success(f"I'm here with you, {PLAYER_NAME}.")
+        st.caption(message)
 
-# =====================
+        st.markdown("### 🌍 Journey Progress")
+        st.progress(min((total_steps + step) / 100, 1.0))
+        st.caption(f"You have gently moved {total_steps + step} steps.")
+
+    st.markdown("---")
+    st.info(
+        "💬 This journey does not rush.\n\n"
+        "💚 Heavy days do not erase progress.\n\n"
+        "🌙 You are not being measured."
+    )
+
+# =========================
 # VIEWER MODE
-# =====================
-if mode == "👀 Viewer":
-    st.title("👀 Progress Overview")
+# =========================
+if mode == "👀 Companion View":
+    st.title("👀 Journey Overview")
 
-    if df.empty:
-        st.info("Belum ada data.")
+    password = st.text_input("Viewer Password", type="password")
+
+    if password != VIEWER_PASSWORD:
+        st.warning("Enter the correct password.")
     else:
-        st.dataframe(df)
+        st.success("Access granted")
 
-        total = df["poin"].sum()
-        st.metric("Total Poin", total)
+        if df.empty:
+            st.info("The journey has just begun.")
+        else:
+            st.dataframe(df)
 
-        st.line_chart(df.set_index("tanggal")["poin"])
+            st.metric("Total Gentle Steps", total_steps)
+            st.line_chart(df.set_index("date")["step"])
+
+        st.caption(
+            "This view is for understanding, not controlling.\n"
+            "Presence matters more than speed."
+        )

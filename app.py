@@ -10,7 +10,7 @@ from streamlit_lottie import st_lottie
 # CONFIGURATION
 # ==================================================
 PLAYER_NAME = "Zara"              # ganti ke "Sayang" jika mau
-VIEWER_PASSWORD = "calm123"       # ganti password viewer jika perlu
+VIEWER_PASSWORD = "calm123"       # ganti jika perlu
 DATA_FILE = "journey.csv"
 
 st.set_page_config(
@@ -28,26 +28,26 @@ def load_lottie(url):
         return None
     return r.json()
 
-# Companion animations (non-human creature)
+# Companion (non-human creature)
 lottie_idle = load_lottie("https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json")
 lottie_walk = load_lottie("https://assets6.lottiefiles.com/packages/lf20_kkflmtur.json")
 lottie_rest = load_lottie("https://assets8.lottiefiles.com/packages/lf20_0fhlytwe.json")
 
-# World animations
+# World evolution
 world_night = load_lottie("https://assets2.lottiefiles.com/packages/lf20_3rwasyjy.json")
 world_dawn = load_lottie("https://assets4.lottiefiles.com/packages/lf20_jmBauI.json")
 world_garden = load_lottie("https://assets6.lottiefiles.com/packages/lf20_x62chJ.json")
 
 # ==================================================
-# COMPANION DIALOGUE (LEVEL 3)
+# COMPANION DIALOGUE (SOFT, NON-JUDGMENTAL)
 # ==================================================
 DIALOGUE = [
-    "I’m still here with you.",
-    "There is no rush here.",
+    "I’m here with you.",
+    "There is no rush.",
     "You are allowed to rest.",
-    "Even quiet days matter.",
-    "We can move slowly together.",
-    "Nothing is expected of you.",
+    "Quiet moments matter.",
+    "We can stay like this.",
+    "Nothing is required of you.",
     "You didn’t disappear today.",
     "Just being here is enough."
 ]
@@ -64,11 +64,11 @@ else:
 total_steps = df["step"].sum() if not df.empty else 0
 
 # ==================================================
-# WORLD EVOLUTION LOGIC (LEVEL 2)
+# WORLD LOGIC
 # ==================================================
 if total_steps < 20:
     world_anim = world_night
-    world_text = "🌙 The world is quiet and safe."
+    world_text = "🌙 The world feels quiet and safe."
 elif total_steps < 50:
     world_anim = world_dawn
     world_text = "🌅 Light is slowly appearing."
@@ -82,27 +82,55 @@ else:
 mode = st.sidebar.radio("Mode", ["🎮 Journey", "👀 Companion View"])
 
 # ==================================================
-# PLAYER MODE (LEVEL 1–4)
+# PLAYER MODE
 # ==================================================
 if mode == "🎮 Journey":
     st.title(f"🌱 A Gentle Living Journey with {PLAYER_NAME}")
-    st.caption("No tasks. No scores. Just gentle presence.")
+    st.caption("No goals. No pressure. Just a calm shared space.")
 
-    # 🌊 AMBIENT OCEAN SOUND (STEP A)
-    st.markdown("### 🌊 Ocean Sound")
-    with st.expander("Play ocean waves"):
-        st.audio(
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3",
-            format="audio/mp3"
-        )
-        st.caption("Soft ocean waves. Play or stop anytime.")
+    # 🌫️ LOFT / MALL AMBIENCE (AUTOPLAY MUTED)
+    st.markdown("### 🌫️ Ambient Space")
+
+    st.markdown(
+        """
+        <audio autoplay loop muted id="ambientAudio">
+            <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_4f98c8f6bb.mp3?filename=lofi-ambient-121073.mp3" type="audio/mpeg">
+        </audio>
+
+        <script>
+        const audio = document.getElementById("ambientAudio");
+        audio.volume = 0.12;
+
+        function toggleSound() {
+            audio.muted = !audio.muted;
+        }
+        </script>
+
+        <button onclick="toggleSound()" style="
+            padding:10px 18px;
+            border-radius:14px;
+            border:none;
+            background:#eef2f3;
+            font-size:14px;
+            cursor:pointer;
+            margin-top:8px;
+            ">
+            🔊 Toggle ambient sound
+        </button>
+
+        <p style="font-size:12px; color:gray;">
+        Soft loft ambience. Starts muted. You can unmute anytime.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
     # 🌍 WORLD VIEW
     st.markdown("### 🌍 The World")
     st_lottie(world_anim, height=220)
     st.caption(world_text)
 
-    # 🤍 COMPANION INTERACTION
+    # 🤍 COMPANION
     st.markdown("### 🤍 Your Companion")
 
     choice = st.radio(

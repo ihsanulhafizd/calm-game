@@ -7,7 +7,7 @@ import requests
 from streamlit_lottie import st_lottie
 
 # ==================================================
-# BASIC CONFIG
+# CONFIG
 # ==================================================
 PLAYER_NAME = "Zara"
 VIEWER_PASSWORD = "calm123"
@@ -20,64 +20,91 @@ st.set_page_config(
 )
 
 # ==================================================
-# SOFT MINIMAL UI STYLE (GALLERY / LOFT)
+# SESSION STATE
 # ==================================================
-st.markdown("""
+if "page" not in st.session_state:
+    st.session_state.page = "landing"
+if "theme" not in st.session_state:
+    st.session_state.theme = "light"
+
+def go(page):
+    st.session_state.page = page
+
+def toggle_theme():
+    st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
+
+# ==================================================
+# THEME STYLE
+# ==================================================
+if st.session_state.theme == "light":
+    BG = "#f6f7f4"
+    CARD = "#ffffff"
+    TEXT = "#1f2937"
+    SUB = "#6b7280"
+else:
+    BG = "#0f1115"
+    CARD = "#1a1d24"
+    TEXT = "#e5e7eb"
+    SUB = "#9ca3af"
+
+st.markdown(f"""
 <style>
-html, body, [class*="css"] {
+html, body, [class*="css"] {{
+    background-color: {BG};
+    color: {TEXT};
     font-family: 'Inter', sans-serif;
-    background-color: #f6f7f4;
-}
-.block-container {
-    padding-top: 3rem;
+}}
+.block-container {{
     max-width: 720px;
-}
-h1, h2 {
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-.card {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-}
-.caption {
-    color: #6b7280;
+    padding-top: 2.5rem;
+}}
+.card {{
+    background: {CARD};
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    animation: fadeIn 0.7s ease;
+}}
+.caption {{
+    color: {SUB};
     font-size: 13px;
-}
-.nav {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 30px;
-}
-.nav button {
-    background: #eef0ec;
-    border: none;
-    border-radius: 14px;
-    padding: 8px 14px;
-    cursor: pointer;
-}
+    line-height: 1.6;
+}}
+button {{
+    border-radius: 14px !important;
+}}
+@keyframes fadeIn {{
+    from {{ opacity: 0; transform: translateY(6px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# LOAD LOTTIE (ANIMASI HALUS)
+# LOAD LOTTIE
 # ==================================================
 def load_lottie(url):
     r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+    return r.json() if r.status_code == 200 else None
 
+# Companion animations
 lottie_idle = load_lottie("https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json")
 lottie_walk = load_lottie("https://assets6.lottiefiles.com/packages/lf20_kkflmtur.json")
 lottie_rest = load_lottie("https://assets8.lottiefiles.com/packages/lf20_0fhlytwe.json")
 
+# World animations
 world_night = load_lottie("https://assets2.lottiefiles.com/packages/lf20_3rwasyjy.json")
 world_dawn = load_lottie("https://assets4.lottiefiles.com/packages/lf20_jmBauI.json")
 world_garden = load_lottie("https://assets6.lottiefiles.com/packages/lf20_x62chJ.json")
+
+DIALOGUE = [
+    "I’m here with you.",
+    "There is no rush.",
+    "Quiet moments are enough.",
+    "Nothing is required of you.",
+    "You are allowed to rest."
+]
 
 # ==================================================
 # DATA
@@ -94,49 +121,56 @@ total_steps = df["step"].sum() if not df.empty else 0
 # WORLD STATE
 # ==================================================
 if total_steps < 20:
-    world_anim = world_night
-    world_text = "The world feels quiet and safe."
+    world_anim, world_text = world_night, "The world is quiet and safe."
 elif total_steps < 50:
-    world_anim = world_dawn
-    world_text = "Light is slowly appearing."
+    world_anim, world_text = world_dawn, "Light is slowly appearing."
 else:
-    world_anim = world_garden
-    world_text = "The world feels warm and alive."
+    world_anim, world_text = world_garden, "The world feels warm and alive."
 
 # ==================================================
-# SESSION PAGE CONTROL
+# TOP NAV BAR
 # ==================================================
-if "page" not in st.session_state:
-    st.session_state.page = "landing"
+nav1, nav2, nav3, nav4 = st.columns([2,2,2,1])
 
-def go(page):
-    st.session_state.page = page
+with nav1:
+    if st.button("🌱 Journey"):
+        go("journey")
+
+with nav2:
+    if st.button("🌍 World"):
+        go("world")
+
+with nav3:
+    if st.button("👀 Viewer"):
+        go("viewer")
+
+with nav4:
+    if st.button("🌓"):
+        toggle_theme()
 
 # ==================================================
-# LANDING PAGE (OPENING)
+# LANDING PAGE
 # ==================================================
 if st.session_state.page == "landing":
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<h1>🌙 Gentle Living Journey</h1>", unsafe_allow_html=True)
     st.markdown("<p class='caption'>A calm space. Nothing to achieve.</p>", unsafe_allow_html=True)
-
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st_lottie(lottie_idle, height=220)
     st.markdown("""
     <p class='caption'>
-    This space is not a task.<br>
-    It will not measure you.<br>
-    You can move slowly — or not at all.
+    This space will not test you.<br>
+    You can move slowly — or stay still.
     </p>
     """, unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
     if st.button("Enter"):
         go("journey")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
-# JOURNEY PAGE
+# JOURNEY PAGE (PLAYER)
 # ==================================================
 elif st.session_state.page == "journey":
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<h2>🤍 Journey</h2>", unsafe_allow_html=True)
 
     choice = st.radio(
@@ -145,59 +179,48 @@ elif st.session_state.page == "journey":
         label_visibility="collapsed"
     )
 
-    step = 0
-    animation = lottie_idle
-
     if choice == "Sit quietly":
-        step = 1
-        animation = lottie_idle
+        step, anim = 1, lottie_idle
     elif choice == "Walk a little":
-        step = 2
-        animation = lottie_walk
+        step, anim = 2, lottie_walk
     else:
-        step = 0
-        animation = lottie_rest
+        step, anim = 0, lottie_rest
 
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st_lottie(animation, height=240)
+    st_lottie(anim, height=240)
 
     if st.button("Stay here"):
         today = datetime.now().strftime("%Y-%m-%d")
-        df = pd.concat([df, pd.DataFrame([[today, step, choice]], columns=df.columns)])
+        df = pd.concat(
+            [df, pd.DataFrame([[today, step, choice]], columns=df.columns)],
+            ignore_index=True
+        )
         df.to_csv(DATA_FILE, index=False)
-        st.success(random.choice([
-            "I’m here with you.",
-            "There is no rush.",
-            "Quiet moments matter."
-        ]))
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.success(random.choice(DIALOGUE))
 
-    if st.button("View the world"):
-        go("world")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================================================
 # WORLD PAGE
 # ==================================================
 elif st.session_state.page == "world":
-    st.markdown("<h2>🌍 The World</h2>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown("<h2>🌍 The World</h2>", unsafe_allow_html=True)
     st_lottie(world_anim, height=220)
     st.markdown(f"<p class='caption'>{world_text}</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
-    if st.button("Back to journey"):
-        go("journey")
 
 # ==================================================
 # VIEWER PAGE
 # ==================================================
 elif st.session_state.page == "viewer":
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<h2>👀 Companion View</h2>", unsafe_allow_html=True)
     password = st.text_input("Password", type="password")
 
     if password == VIEWER_PASSWORD:
         st.dataframe(df)
         st.metric("Total Gentle Steps", total_steps)
+        st.line_chart(df.set_index("date")["step"])
     else:
         st.warning("Access restricted.")
+    st.markdown("</div>", unsafe_allow_html=True)
